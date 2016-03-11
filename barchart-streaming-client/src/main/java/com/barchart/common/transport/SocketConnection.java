@@ -1,6 +1,9 @@
 package com.barchart.common.transport;
 
 import java.net.URISyntaxException;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONException;
@@ -31,6 +34,8 @@ public abstract class SocketConnection implements IDisposable {
 	
 	private final Event<SocketConnectionState> _connectionStateChanged;
 	
+	private final ConcurrentMap<String, IAction<JSONObject>> _requestMap;
+	
 	public SocketConnection(final String host, final int port, final boolean secure) {
 		_host = host;
 		_port = port;
@@ -51,6 +56,8 @@ public abstract class SocketConnection implements IDisposable {
 		_connectionLock = new Object();
 		
 		_connectionStateChanged = new Event<SocketConnectionState>("connectionStateChanged");
+		
+		_requestMap = new ConcurrentHashMap<String, IAction<JSONObject>>(16, 0.75f, 2);
 		
 		registerSocketEventListener(Socket.EVENT_CONNECT, new Emitter.Listener() {
 			@Override
@@ -83,8 +90,26 @@ public abstract class SocketConnection implements IDisposable {
 		registerSocketEventListener(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
-				System.out.println("error");
-				System.out.println(args[0]);
+				logger.warn("A connection error occurred. Current socket state is {}. Error: {}.", _connectionState, args[0]);
+			}
+		});
+		
+		registerSocketEventListener(SocketChannel.Response, new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				final JSONObject data = (JSONObject)args[0];
+				
+				final String requestId = data.optString("requestId");
+
+				logMessageReceipt(SocketChannel.Response, data);
+				
+				IAction<JSONObject> responseHandler = _requestMap.remove(requestId);
+				
+				if (responseHandler != null) {
+					responseHandler.execute(data.optJSONObject("response"));
+				} else {
+					logger.warn("Recieved response without corresponding request {}", requestId);
+				}
 			}
 		});
 	}
@@ -172,6 +197,34 @@ public abstract class SocketConnection implements IDisposable {
             
             logger.debug("Sent message {} to {}", socketSequence, socketChannel);
         }
+	}
+	
+	protected final void requestFromServer(final ISocketChannel socketChannel, final JSONObject data, final IAction<JSONObject> callback) {
+		if (socketChannel == null) {
+			throw new IllegalArgumentException("The \"socketChannel\" argument is required.");
+		}
+		
+		if (data == null) {
+			throw new IllegalArgumentException("The \"data\" argument is required.");
+		}
+		
+		final UUID requestUuid = UUID.randomUUID();
+		final String requestId = requestUuid.toString();
+		
+		_requestMap.put(requestId, callback);
+		
+		JSONObject envelope = new JSONObject();
+		
+		try {
+			envelope.put("requestId", requestId);
+			envelope.put("request", data);
+		} catch (JSONException e) {
+			logger.error("Unable to construct JSON payload for request message.", e);
+			
+			envelope = null;
+		}
+		
+		sendToServer(socketChannel, envelope);
 	}
     
 	private void changeConnectionState(final SocketConnectionState connectionState) {

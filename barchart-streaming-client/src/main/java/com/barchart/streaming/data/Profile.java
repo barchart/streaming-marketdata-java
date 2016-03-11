@@ -11,7 +11,7 @@ public class Profile implements IProfile {
 	private final String _month;
 	private final String _year;
 	
-	Profile(final String symbol, final String name, final String exchange, final String unitCode, final String pointValue, final String tickIncrement, final String root, final String month, final String year) {
+	public Profile(final String symbol, final String name, final String exchange, final String unitCode, final String pointValue, final String tickIncrement, final String root, final String month, final String year) {
 		_symbol = symbol;
 		_name = name;
 		_exchange = exchange;
@@ -66,5 +66,10 @@ public class Profile implements IProfile {
 	@Override
 	public String getYear() {
 		return _year;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("[Profile (symbol: %s)]", _symbol);
 	}
 }

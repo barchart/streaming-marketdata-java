@@ -3,13 +3,18 @@ package com.barchart.streaming.connection;
 import com.barchart.common.transport.ISocketChannel;
 
 enum MarketSocketChannel implements ISocketChannel {
+	RequestProfile("request/profile"),
+	Response("response"),
+	
 	SubscribeTimestamp("subscribe/timestamp"),
 	UnsubscribeTimestamp("unsubscribe/timestamp"),
 	Timestamp("timestamp"),
 	
 	ChangeSymbolSubscription("subscribe/symbols"),
 	QuoteSnapshot("quote/snapshot"),
-	QuoteDelta("quote/delta");
+	QuoteDelta("quote/delta"),
+	
+	ProfileSnapshot("profile/snapshot");
 	
 	private final String _channelName;
 	

@@ -17,6 +17,7 @@ import com.barchart.common.transport.SocketConnection;
 import com.barchart.common.transport.SocketConnectionState;
 import com.barchart.streaming.data.IProfile;
 import com.barchart.streaming.data.IQuote;
+import com.barchart.streaming.data.Profile;
 
 import io.socket.emitter.Emitter;
 
@@ -28,7 +29,6 @@ public final class MarketSocketConnection extends SocketConnection {
 	
 	private final ConcurrentMap<String, Event<ISynchronizer<IQuote>>> _quoteEvents;
 	private final ConcurrentMap<String, Event<ISynchronizer<IQuote>>> _priceChangeEvents;
-	private final ConcurrentMap<String, IAction<JSONObject>> _requestMap;
 	
 	private final Event<String> _timestampEvent;
 	
@@ -48,7 +48,6 @@ public final class MarketSocketConnection extends SocketConnection {
 		
 		_quoteEvents = new ConcurrentHashMap<String, Event<ISynchronizer<IQuote>>>(64, 0.75f, 2);
 		_priceChangeEvents = new ConcurrentHashMap<String, Event<ISynchronizer<IQuote>>>(64, 0.75f, 2);
-		_requestMap = new ConcurrentHashMap<String, IAction<JSONObject>>(16, 0.75f, 2);
 		
 		_timestampEvent = new Event<String>("timestampUpdate");
 		
@@ -68,6 +67,19 @@ public final class MarketSocketConnection extends SocketConnection {
 			}
 		});
 		
+		registerSocketEventListener(MarketSocketChannel.ProfileSnapshot, new Emitter.Listener() {
+			public void call(Object... args) {
+				final JSONObject data = (JSONObject)args[0];
+				final String symbol = data.optString("symbol");
+				
+				logMessageReceipt(MarketSocketChannel.ProfileSnapshot, data);
+
+				if (symbol != null) {
+					updateProfile(symbol, data);
+				}
+			}
+		});
+		
 		registerSocketEventListener(MarketSocketChannel.QuoteSnapshot, new Emitter.Listener() {
 			public void call(Object... args) {
 				final JSONObject data = (JSONObject)args[0];
@@ -75,6 +87,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				
 				logMessageReceipt(MarketSocketChannel.QuoteSnapshot, data);
 
+				/*
 				if (symbol != null) {
 					final ISynchronizer<IQuote> synchronizer = getQuoteSynchronizer(symbol, data);
 					
@@ -84,6 +97,7 @@ public final class MarketSocketConnection extends SocketConnection {
 						event.fire(synchronizer);
 					}
 				}
+				*/
 			}
 		});
 		
@@ -281,8 +295,35 @@ public final class MarketSocketConnection extends SocketConnection {
 		}
 	}
 	
-	public void getProfile(final String symbol, final IAction<IProfile> callback) {
+	public void requestProfile(final String symbol, final IAction<IProfile> callback) {
+		if (symbol == null) {
+			throw new IllegalArgumentException("The \"symbol\" argument is required.");
+		}
 		
+		final IProfile profile = _profiles.get(symbol);
+		
+		if (profile != null) {
+			callback.execute(profile);
+		} else {
+			JSONObject payload = new JSONObject();
+			
+			try {
+				payload.put("symbol", symbol);
+			} catch (JSONException e) {
+				logger.error("Unable to construct JSON payload for profile request.", e);
+				
+				payload = null;
+			}
+			
+			final IAction<JSONObject> requestHandler = new IAction<JSONObject>() {
+				@Override
+				public void execute(JSONObject data) {
+					callback.execute(updateProfile(symbol, data));
+				}
+			};
+			
+			requestFromServer(MarketSocketChannel.RequestProfile, payload, requestHandler);
+		}
 	}
 	
 	@Override
@@ -310,7 +351,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				returnRef.put("subscribeToPrices", subscribeToPrices.booleanValue());
 			}
 		} catch (JSONException e) {
-			logger.error("Unable to construct JSON payload for symbol subscription", e);
+			logger.error("Unable to construct JSON payload for symbol subscription.", e);
 			
 			returnRef = null;
 		}
@@ -318,7 +359,25 @@ public final class MarketSocketConnection extends SocketConnection {
 		return returnRef;
 	}
 	
-	private static ISynchronizer<IQuote> getQuoteSynchronizer(final String symbol, final JSONObject data) {
+	private ISynchronizer<IQuote> synchronizeQuote(final String symbol, final JSONObject data) {
 		return null;
+	}
+	
+	private IProfile updateProfile(final String symbol, final JSONObject data) {
+		IProfile profile = new Profile(
+				symbol, 
+				data.optString("name"),
+				data.optString("exchange"),
+				data.optString("unitCode"),
+				data.optString("pointValue"),
+				data.optString("tickIncrement"),
+				data.optString("root"),
+				data.optString("month"),
+				data.optString("year")
+			);
+
+		_profiles.put(symbol, profile);
+		
+		return profile;
 	}
 }

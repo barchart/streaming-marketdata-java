@@ -10,6 +10,7 @@ import com.barchart.common.IAction;
 import com.barchart.common.data.ISynchronizer;
 import com.barchart.common.transport.SocketConnectionState;
 import com.barchart.streaming.connection.MarketSocketConnection;
+import com.barchart.streaming.data.IProfile;
 import com.barchart.streaming.data.IQuote;
 
 public class RealtimeTestClient {
@@ -31,22 +32,35 @@ public class RealtimeTestClient {
 			@Override
 			public void execute(SocketConnectionState data) {
 				workQueue.add(String.format("Connection state changed to %s", data));
+				
+				if (data == SocketConnectionState.Connected) {
+					c.requestProfile("TSLA", new IAction<IProfile>() {
+						@Override
+						public void execute(IProfile profile) {
+							workQueue.add(String.format("Profile request fulfilled %s", profile));
+						}
+					});
+				}
 			}
 		});
 		
+		/*
 		c.subscribeToTimestamp(new IAction<String>() {
 			@Override
 			public void execute(String timestamp) {
 				workQueue.add(String.format("Timestamp: %s", timestamp));
 			}
 		});
+		*/
 		
+		/*
 		c.subscribeToQuotes("TSLA", new IAction<ISynchronizer<IQuote>>() {
 			@Override
 			public void execute(ISynchronizer<IQuote> synchronizer) {
 				workQueue.add(String.format("Quote synchronizer received: %s", synchronizer));
 			}
 		});
+		*/
 
 		final Thread t = new Thread(new Runnable() {
 			@Override
