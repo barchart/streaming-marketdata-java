@@ -10,14 +10,16 @@ import com.barchart.common.IAction;
 import com.barchart.common.data.ISynchronizer;
 import com.barchart.common.transport.SocketConnectionState;
 import com.barchart.streaming.connection.MarketSocketConnection;
+import com.barchart.streaming.data.IMutableQuote;
 import com.barchart.streaming.data.IProfile;
 import com.barchart.streaming.data.IQuote;
+import com.barchart.streaming.data.MutableQuote;
 
 public class RealtimeTestClient {
 	private static final Logger logger;
 	
 	static {
-		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
+		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
 		
 		logger = LoggerFactory.getLogger(RealtimeTestClient.class);
 	}
@@ -37,10 +39,22 @@ public class RealtimeTestClient {
 					c.requestProfile("TSLA", new IAction<IProfile>() {
 						@Override
 						public void execute(IProfile profile) {
-							workQueue.add(String.format("Profile request fulfilled %s", profile));
+							workQueue.add(String.format("Profile request fulfilled %s.", profile));
 						}
 					});
 				}
+			}
+		});
+		
+		final IMutableQuote tsla = new MutableQuote("TSLA");
+		
+		c.subscribeToQuotes("TSLA", new IAction<ISynchronizer<IMutableQuote>>() {
+			@Override
+			public void execute(ISynchronizer<IMutableQuote> synchronizer) {
+				synchronizer.synchronize(tsla);
+				
+				workQueue.add(String.format("Quote synchronizer received: %s", synchronizer));
+				workQueue.add(String.format("Quote udpated: %s", tsla));
 			}
 		});
 		
@@ -49,15 +63,6 @@ public class RealtimeTestClient {
 			@Override
 			public void execute(String timestamp) {
 				workQueue.add(String.format("Timestamp: %s", timestamp));
-			}
-		});
-		*/
-		
-		/*
-		c.subscribeToQuotes("TSLA", new IAction<ISynchronizer<IQuote>>() {
-			@Override
-			public void execute(ISynchronizer<IQuote> synchronizer) {
-				workQueue.add(String.format("Quote synchronizer received: %s", synchronizer));
 			}
 		});
 		*/
