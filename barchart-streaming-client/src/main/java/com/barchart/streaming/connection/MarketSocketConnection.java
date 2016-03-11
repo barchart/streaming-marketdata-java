@@ -28,7 +28,7 @@ public final class MarketSocketConnection extends SocketConnection {
 	private static final Logger logger = LoggerFactory.getLogger(MarketSocketConnection.class);
 	
 	private final ConcurrentMap<String, IProfile> _profiles;
-	private final ConcurrentMap<String, IQuote> _quotes;
+	private final ConcurrentMap<String, IMutableQuote> _quotes;
 	
 	private final ConcurrentMap<String, Event<ISynchronizer<IMutableQuote>>> _quoteEvents;
 	private final ConcurrentMap<String, Event<ISynchronizer<IMutableQuote>>> _priceChangeEvents;
@@ -36,18 +36,18 @@ public final class MarketSocketConnection extends SocketConnection {
 	private final Event<String> _timestampEvent;
 	
 	public MarketSocketConnection() {
-		this("jerq-aggregator-prod.aws.barchart.com", 80, true);
+		this("jerq-aggregator-prod.aws.barchart.com", 80, false);
 	}
 	
 	public MarketSocketConnection(final String host) {
-		this(host, 80, true);
+		this(host, 80, false);
 	}
 	
 	public MarketSocketConnection(final String host, final int port, final boolean secure) {
 		super(host, port, secure);
 		
 		_profiles = new ConcurrentHashMap<String, IProfile>(64, 0.75f, 2);
-		_quotes = new ConcurrentHashMap<String, IQuote>(64, 0.75f, 2);
+		_quotes = new ConcurrentHashMap<String, IMutableQuote>(64, 0.75f, 2);
 		
 		_quoteEvents = new ConcurrentHashMap<String, Event<ISynchronizer<IMutableQuote>>>(64, 0.75f, 2);
 		_priceChangeEvents = new ConcurrentHashMap<String, Event<ISynchronizer<IMutableQuote>>>(64, 0.75f, 2);
@@ -92,15 +92,23 @@ public final class MarketSocketConnection extends SocketConnection {
 
 				if (symbol != null) {
 					final ISynchronizer<IMutableQuote> synchronizer = new QuoteSynchronizer(symbol, data);
-					final IQuote quote = new MutableQuote(symbol, synchronizer);
+					final IMutableQuote quote = new MutableQuote(symbol, synchronizer);
 					
 					_quotes.put(symbol, quote);
 					
-					final Event<ISynchronizer<IMutableQuote>> event = _quoteEvents.get(symbol);
+					final Event<ISynchronizer<IMutableQuote>> quoteEvent = _quoteEvents.get(symbol);
 					
-					if (event != null) {
-						event.fire(synchronizer);
+					if (quoteEvent != null) {
+						quoteEvent.fire(synchronizer);
 					}
+					
+					final Event<ISynchronizer<IMutableQuote>> priceUpdateEvent = _quoteEvents.get(symbol);
+					
+					if (priceUpdateEvent != null) {
+						priceUpdateEvent.fire(synchronizer);
+					}
+				} else {
+					logger.warn("Dropping {} due to missing symbol.", MarketSocketChannel.QuoteSnapshot);
 				}
 			}
 		});
@@ -113,11 +121,20 @@ public final class MarketSocketConnection extends SocketConnection {
 				logMessageReceipt(MarketSocketChannel.QuoteDelta, data);
 				
 				if (symbol != null) {
+					final ISynchronizer<IMutableQuote> synchronizer = new QuoteSynchronizer(symbol, data);
 					Event<ISynchronizer<IMutableQuote>> event = _quoteEvents.get(symbol);
 					
-					if (event != null) {
-						
+					IMutableQuote quote = _quotes.get(symbol);
+					
+					if (quote != null) {
+						synchronizer.synchronize(quote);
 					}
+					
+					if (event != null) {
+						event.fire(synchronizer);
+					}
+				} else {
+					logger.warn("Dropping {} due to missing symbol.", MarketSocketChannel.QuoteDelta);
 				}
 			}
 		});
@@ -364,7 +381,7 @@ public final class MarketSocketConnection extends SocketConnection {
 	}
 	
 	private IProfile updateProfile(final String symbol, final JSONObject data) {
-		IProfile profile = new Profile(
+		final IProfile profile = new Profile(
 				symbol, 
 				data.optString("name"),
 				data.optString("exchange"),

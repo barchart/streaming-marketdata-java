@@ -19,7 +19,7 @@ public class RealtimeTestClient {
 	private static final Logger logger;
 	
 	static {
-		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
 		
 		logger = LoggerFactory.getLogger(RealtimeTestClient.class);
 	}
