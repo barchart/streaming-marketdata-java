@@ -1,6 +1,12 @@
 package com.barchart.common.transport;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -20,7 +26,11 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 public abstract class SocketConnection implements IDisposable {
-	private static final Logger logger = LoggerFactory.getLogger(SocketConnection.class);
+	private static final Logger logger;
+	
+	private static final AtomicInteger socketCounter;
+	
+	private final int _id;
 	
 	private final String _host;
 	private final int _port;
@@ -36,16 +46,40 @@ public abstract class SocketConnection implements IDisposable {
 	
 	private final ConcurrentMap<String, IAction<JSONObject>> _requestMap;
 	
+	static {
+		logger = LoggerFactory.getLogger(SocketConnection.class);
+		
+		socketCounter = new AtomicInteger(0);
+	}
+	
 	public SocketConnection(final String host, final int port, final boolean secure) {
+		if (host == null) {
+			throw new IllegalArgumentException("The \"host\" argument is required.");
+		}
+		
+		if (port < 0 || port > 65536) {
+			throw new IllegalArgumentException("The \"port\" is not a valid TCP port number.");
+		}
+		
+		_id = socketCounter.incrementAndGet();
+		
 		_host = host;
 		_port = port;
 		_secure = secure;
 		
 		Socket socket;
 		
-		try {
-			socket = IO.socket(getServerUri(_host, _port, _secure));
+		logger.info("Creating socket.io connection to (host: %s, port: %s, secure: %s)", host, port, secure);
+		
+		final String serverUri = getServerUri(_host, _port, _secure);
+		
+		logger.info("Attempting to open socket.io connection to {}", serverUri);
+		
+		try {	
+			socket = IO.socket(serverUri);
 		} catch (URISyntaxException e) {
+			logger.error("Socket URI is invalid", e);
+			
 			socket = null;
 		}
 		
@@ -62,6 +96,8 @@ public abstract class SocketConnection implements IDisposable {
 		registerSocketEventListener(Socket.EVENT_CONNECT, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
+				logger.debug("A socket.io {} event occurred.", Socket.EVENT_CONNECT);
+				
 				changeConnectionState(SocketConnectionState.Connected);
 			}
 		});
@@ -69,6 +105,8 @@ public abstract class SocketConnection implements IDisposable {
 		registerSocketEventListener(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
+				logger.debug("A socket.io {} event occurred.", Socket.EVENT_RECONNECTING);
+				
 				changeConnectionState(SocketConnectionState.Connecting);
 			}
 		});
@@ -76,6 +114,8 @@ public abstract class SocketConnection implements IDisposable {
 		registerSocketEventListener(Socket.EVENT_RECONNECT, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
+				logger.debug("A socket.io {} event occurred.", Socket.EVENT_RECONNECT);
+				
 				changeConnectionState(SocketConnectionState.Connected);
 			}
 		});
@@ -83,6 +123,8 @@ public abstract class SocketConnection implements IDisposable {
 		registerSocketEventListener(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
+				logger.debug("A socket.io {} event occurred.", Socket.EVENT_DISCONNECT);
+				
 				changeConnectionState(SocketConnectionState.Disconnected);
 			}
 		});
@@ -90,7 +132,7 @@ public abstract class SocketConnection implements IDisposable {
 		registerSocketEventListener(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
-				logger.warn("A connection error occurred. Current socket state is {}. Error: {}.", _connectionState, args[0]);
+				logger.warn("A socket.io {} event occurred. Current state is {}. Error: {}.", Socket.EVENT_CONNECT_ERROR, _connectionState, args[0]);
 			}
 		});
 		
@@ -115,15 +157,19 @@ public abstract class SocketConnection implements IDisposable {
 	}
 	
 	public final void connect() {
-		changeConnectionState(SocketConnectionState.Connecting);
+		logger.debug("Staring manual connection attempt.");
 		
-		_socket.connect();
+		if (changeConnectionState(SocketConnectionState.Connecting, true)) {
+			_socket.connect();
+		}
 	}
 	
 	public final void disconnect() {
-		changeConnectionState(SocketConnectionState.Disconnecting);
+		logger.debug("Staring manual disconnect attempt.");
 		
-		_socket.disconnect();
+		if (changeConnectionState(SocketConnectionState.Disconnecting, true)) {
+			_socket.disconnect();
+		}
 	}
 	
 	protected void onConnectionStateChanged(final SocketConnectionState connectionState) {
@@ -227,22 +273,34 @@ public abstract class SocketConnection implements IDisposable {
 		sendToServer(socketChannel, envelope);
 	}
     
-	private void changeConnectionState(final SocketConnectionState connectionState) {
+	private boolean changeConnectionState(final SocketConnectionState connectionState, final boolean ignoreInvalidStateChange) {
+		boolean returnVal = false;
+		
 		synchronized (_connectionLock) {
 			if (connectionState != _connectionState) {
 				if (!_connectionState.canTransitionTo(connectionState)) {
-					throw new IllegalStateException(String.format("Unable to change connection from %s to %s", _connectionState, connectionState));
+					logger.debug("Changing socket connection state to {}", connectionState);
+					
+					onConnectionStateChanged(_connectionState = connectionState);
+					
+					_connectionStateChanged.fire(_connectionState);
+					
+					logger.debug("Changed socket connection state to {}", _connectionState);
+					
+					returnVal = true;
+				} else {
+					if (!ignoreInvalidStateChange) {
+						throw new IllegalStateException(String.format("Unable to change connection from %s to %s", _connectionState, connectionState));
+					}
 				}
-				
-				logger.debug("Changing socket connection state to {}", connectionState);
-				
-				onConnectionStateChanged(_connectionState = connectionState);
-				
-				_connectionStateChanged.fire(_connectionState);
-				
-				logger.debug("Changed socket connection state to {}", _connectionState);
 			}
 		}
+		
+		return returnVal;
+	}
+	
+	private boolean changeConnectionState(final SocketConnectionState connectionState) {
+		return changeConnectionState(connectionState, false);
 	}
 
 	@Override
@@ -252,19 +310,53 @@ public abstract class SocketConnection implements IDisposable {
 	
 	@Override
 	public String toString() {
-		return String.format("[SocketConnection (host: %s, port: %s, secure: %s)]", _host, _port, _secure);
+		return String.format("[SocketConnection (id: %s, host: %s, port: %s, secure: %s)]", _id, _host, _port, _secure);
 	}
 	
 	private static final String getServerUri(final String host, final int port, final boolean secure) {
 		final String protocol;
 		
+		String hostToUse = host;
+		
 		if (secure) {
 			protocol = "https";
 		} else {
 			protocol = "http";
+			
+			if (!host.equals("localhost")) {
+				BufferedReader bufferedReader = null;
+				
+				try {
+					final URL url = new URL(String.format("http://%s:%s/ip", host, port));
+					final URLConnection urlConnection = url.openConnection();
+					final HttpURLConnection connection = (HttpURLConnection)urlConnection;
+					
+					connection.setRequestMethod("GET");
+					connection.setReadTimeout(30000);
+
+					connection.connect();
+					
+					final InputStreamReader inputStramReader = new InputStreamReader(connection.getInputStream());
+					bufferedReader = new BufferedReader(inputStramReader);
+					
+					hostToUse = bufferedReader.readLine();
+				} catch (Exception e) {
+					logger.error("Unable to construct URL for server address query.", e);
+					
+					hostToUse = host;
+				} finally {
+					if (bufferedReader != null) {
+						try {
+							bufferedReader.close();
+						} catch (IOException e) {
+							logger.error("Unable to close BufferedReader", e);
+						}
+					}
+				}
+			}
 		}
 		
-		return protocol + "://" + host + ":" + port;
+		return String.format("%s://%s:%s", protocol, hostToUse, port);
 	}
 	
 	protected void logMessageReceipt(final ISocketChannel socketChannel, JSONObject data) {

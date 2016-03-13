@@ -27,7 +27,8 @@ public class RealtimeTestClient {
 		final BlockingQueue<String> workQueue = new LinkedBlockingQueue<String>();
 		
 		//final MarketSocketConnection c = new MarketSocketConnection("jerq-aggregator-stage.elasticbeanstalk.com", 80, false);
-		final MarketSocketConnection c = new MarketSocketConnection("localhost", 8082, false);
+		final MarketSocketConnection c = new MarketSocketConnection("jerq-aggregator-load-3.us-east-1.elasticbeanstalk.com", 80, false);
+		//final MarketSocketConnection c = new MarketSocketConnection("localhost", 8082, false);
 		
 		c.registerConnectionStateChangeObserver(new IAction<SocketConnectionState>() {
 			@Override
