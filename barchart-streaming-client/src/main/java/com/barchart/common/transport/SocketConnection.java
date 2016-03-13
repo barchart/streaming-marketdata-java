@@ -229,17 +229,19 @@ public abstract class SocketConnection implements IDisposable {
     
 	private void changeConnectionState(final SocketConnectionState connectionState) {
 		synchronized (_connectionLock) {
-			if (!_connectionState.canTransitionTo(connectionState)) {
-				throw new IllegalStateException(String.format("Unable to change connection from %s to %s", _connectionState, connectionState));
+			if (connectionState != _connectionState) {
+				if (!_connectionState.canTransitionTo(connectionState)) {
+					throw new IllegalStateException(String.format("Unable to change connection from %s to %s", _connectionState, connectionState));
+				}
+				
+				logger.debug("Changing socket connection state to {}", connectionState);
+				
+				onConnectionStateChanged(_connectionState = connectionState);
+				
+				_connectionStateChanged.fire(_connectionState);
+				
+				logger.debug("Changed socket connection state to {}", _connectionState);
 			}
-			
-			logger.debug("Changing socket connection state to {}", connectionState);
-			
-			onConnectionStateChanged(_connectionState = connectionState);
-			
-			_connectionStateChanged.fire(_connectionState);
-			
-			logger.debug("Changed socket connection state to {}", _connectionState);
 		}
 	}
 

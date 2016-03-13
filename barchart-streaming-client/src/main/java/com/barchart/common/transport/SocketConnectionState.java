@@ -32,6 +32,7 @@ public enum SocketConnectionState {
 		_transitions.get(SocketConnectionState.Initializing).add(SocketConnectionState.Connecting);
 		_transitions.get(SocketConnectionState.Connecting).add(SocketConnectionState.Connected);
 		_transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Disconnecting);
+		_transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Disconnected);
 		_transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Connecting);
 		_transitions.get(SocketConnectionState.Disconnecting).add(SocketConnectionState.Disconnected);
 		_transitions.get(SocketConnectionState.Disconnected).add(SocketConnectionState.Connecting);
