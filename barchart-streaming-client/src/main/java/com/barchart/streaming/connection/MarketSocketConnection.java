@@ -18,7 +18,6 @@ import com.barchart.common.transport.SocketConnectionState;
 import com.barchart.streaming.connection.synchronizers.QuoteSynchronizer;
 import com.barchart.streaming.data.IMutableQuote;
 import com.barchart.streaming.data.IProfile;
-import com.barchart.streaming.data.IQuote;
 import com.barchart.streaming.data.MutableQuote;
 import com.barchart.streaming.data.Profile;
 
@@ -102,7 +101,7 @@ public final class MarketSocketConnection extends SocketConnection {
 						quoteEvent.fire(synchronizer);
 					}
 					
-					final Event<ISynchronizer<IMutableQuote>> priceUpdateEvent = _quoteEvents.get(symbol);
+					final Event<ISynchronizer<IMutableQuote>> priceUpdateEvent = _priceChangeEvents.get(symbol);
 					
 					if (priceUpdateEvent != null) {
 						priceUpdateEvent.fire(synchronizer);
@@ -151,13 +150,13 @@ public final class MarketSocketConnection extends SocketConnection {
 			
 			synchronized (_quoteEvents) {
 				if (!_quoteEvents.isEmpty()) {
-					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(_quoteEvents.keySet().toArray(new String[0]), Boolean.TRUE, null));
+					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(_quoteEvents.keySet().toArray(new String[_quoteEvents.size()]), Boolean.TRUE, null));
 				}
 			}
 			
 			synchronized (_priceChangeEvents) {
 				if (!_priceChangeEvents.isEmpty()) {
-					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(_priceChangeEvents.keySet().toArray(new String[0]), null, Boolean.TRUE));
+					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(_priceChangeEvents.keySet().toArray(new String[_priceChangeEvents.size()]), null, Boolean.TRUE));
 				}
 			}
 		}

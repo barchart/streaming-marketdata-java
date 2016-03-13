@@ -46,18 +46,98 @@ public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
 	
 	private void synchronizeProperty(final IMutableQuote target, final String name) {
 		switch (name) {
+			case "sequence": {
+				target.setSequence(Integer.valueOf(_data.optInt(name)));
+				break;
+			}
+			case "flag": {
+				target.setFlag(_data.optString(name));
+				break;
+			}
+			case "online": {
+				target.setOnline(_data.optBoolean(name));
+				break;
+			}
+			case "mode": {
+				target.setMode(_data.optString(name));
+				break;
+			}
+			case "session": {
+				target.setSession(_data.optString(name));
+				break;
+			}
+			case "day": {
+				target.setDay(_data.optString(name));
+				break;
+			}
+			case "dayNum": {
+				target.setDayNum(Integer.valueOf(_data.optInt(name)));
+				break;
+			}
+			case "lastPrice": {
+				target.setLastPrice(Double.valueOf(_data.optDouble(name)));
+				break;
+			}
+			case "previousPrice": {
+				target.setPreviousPrice(Double.valueOf(_data.optDouble(name)));
+				break;
+			}
+			case "tradePrice": {
+				target.setTradePrice(Double.valueOf(_data.optDouble(name)));
+				break;
+			}
+			case "tradeSize": {
+				target.setTradeSize(Integer.valueOf(_data.optInt(name)));
+				break;
+			}
+			case "bidPrice": {
+				target.setBidPrice(Double.valueOf(_data.optDouble(name)));
+				break;
+			}
 			case "bidSize": {
-				target.setBidSize(_data.optInt(name));
+				target.setBidSize(Integer.valueOf(_data.optInt(name)));
+				break;
+			}
+			case "askPrice": {
+				target.setAskPrice(Double.valueOf(_data.optDouble(name)));
 				break;
 			}
 			case "askSize": {
-				target.setAskSize(_data.optInt(name));
+				target.setAskSize(Integer.valueOf(_data.optInt(name)));
 				break;
 			}
-			case "sequence": {
-				target.setSequence(_data.optInt(name));
+			case "openPrice": {
+				target.setOpenPrice(Double.valueOf(_data.optDouble(name)));
 				break;
 			}
+			case "highPrice": {
+				target.setHighPrice(Double.valueOf(_data.optDouble(name)));
+				break;
+			}
+			case "lowPrice": {
+				target.setLowPrice(Double.valueOf(_data.optDouble(name)));
+				break;
+			}
+			case "settlementPrice": {
+				target.setSettlementPrice(Double.valueOf(_data.optDouble(name)));
+				break;
+			}
+			case "volume": {
+				target.setVolume(Integer.valueOf(_data.optInt(name)));
+				break;
+			}
+			case "openInterest": {
+				target.setOpenInterest(Integer.valueOf(_data.optInt(name)));
+				break;
+			}
+			case "time": {
+				target.setTime(String.valueOf(_data.optString(name)));
+				break;
+			}
+			case "timeDisplay": {
+				target.setTimeDisplay(String.valueOf(_data.optString(name)));
+				break;
+			}			
 			default: {
 				break;
 			}
@@ -66,6 +146,6 @@ public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
 	
 	@Override
 	public String toString() {
-		return "[MutableQuote]";
+		return String.format("[QuoteSynchronizer (symbol: %s)]", _symbol);
 	}
 }

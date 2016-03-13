@@ -12,7 +12,6 @@ import com.barchart.common.transport.SocketConnectionState;
 import com.barchart.streaming.connection.MarketSocketConnection;
 import com.barchart.streaming.data.IMutableQuote;
 import com.barchart.streaming.data.IProfile;
-import com.barchart.streaming.data.IQuote;
 import com.barchart.streaming.data.MutableQuote;
 
 public class RealtimeTestClient {
@@ -45,10 +44,22 @@ public class RealtimeTestClient {
 				}
 			}
 		});
+
+		final IMutableQuote eurusd = new MutableQuote("^EURUSD");
+		
+		c.subscribeToQuotes(eurusd.getSymbol(), new IAction<ISynchronizer<IMutableQuote>>() {
+			@Override
+			public void execute(ISynchronizer<IMutableQuote> synchronizer) {
+				synchronizer.synchronize(eurusd);
+				
+				workQueue.add(String.format("Quote synchronizer received: %s", synchronizer));
+				workQueue.add(String.format("Quote udpated: %s", eurusd));
+			}
+		});
 		
 		final IMutableQuote tsla = new MutableQuote("TSLA");
-		
-		c.subscribeToQuotes("TSLA", new IAction<ISynchronizer<IMutableQuote>>() {
+				
+		c.subscribeToPriceChanges(tsla.getSymbol(), new IAction<ISynchronizer<IMutableQuote>>() {
 			@Override
 			public void execute(ISynchronizer<IMutableQuote> synchronizer) {
 				synchronizer.synchronize(tsla);
