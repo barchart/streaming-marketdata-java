@@ -6,11 +6,11 @@ import org.json.JSONObject;
 import com.barchart.common.data.ISynchronizer;
 import com.barchart.streaming.data.IMutableQuote;
 
-public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
+public class QuoteUpdateSynchronizer implements ISynchronizer<IMutableQuote> {
 	public final String _symbol;
 	public final JSONObject _data;
 	
-	public QuoteSynchronizer(final String symbol, final JSONObject data) {
+	public QuoteUpdateSynchronizer(final String symbol, final JSONObject data) {
 		if (symbol == null) {
 			throw new IllegalArgumentException("The \"symbol\" argument is required.");
 		}
@@ -170,6 +170,6 @@ public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
 	
 	@Override
 	public String toString() {
-		return String.format("[QuoteSynchronizer (symbol: %s)]", _symbol);
+		return String.format("[QuoteUpdateSynchronizer (symbol: %s)]", _symbol);
 	}
 }

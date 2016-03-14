@@ -15,9 +15,11 @@ import com.barchart.common.data.ISynchronizer;
 import com.barchart.common.messaging.Event;
 import com.barchart.common.transport.SocketConnection;
 import com.barchart.common.transport.SocketConnectionState;
-import com.barchart.streaming.connection.synchronizers.QuoteSynchronizer;
+import com.barchart.streaming.connection.synchronizers.QuoteCopySynchronizer;
+import com.barchart.streaming.connection.synchronizers.QuoteUpdateSynchronizer;
 import com.barchart.streaming.data.IMutableQuote;
 import com.barchart.streaming.data.IProfile;
+import com.barchart.streaming.data.IQuote;
 import com.barchart.streaming.data.MutableQuote;
 import com.barchart.streaming.data.Profile;
 
@@ -94,7 +96,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				logMessageReceipt(MarketSocketChannel.QuoteSnapshot, data);
 
 				if (symbol != null) {
-					final ISynchronizer<IMutableQuote> synchronizer = new QuoteSynchronizer(symbol, data);
+					final ISynchronizer<IMutableQuote> synchronizer = new QuoteUpdateSynchronizer(symbol, data);
 					final IMutableQuote quote = new MutableQuote(symbol, synchronizer);
 					
 					_quotes.put(symbol, quote);
@@ -124,7 +126,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				logMessageReceipt(MarketSocketChannel.QuoteDelta, data);
 				
 				if (symbol != null) {
-					final ISynchronizer<IMutableQuote> synchronizer = new QuoteSynchronizer(symbol, data);
+					final ISynchronizer<IMutableQuote> synchronizer = new QuoteUpdateSynchronizer(symbol, data);
 					Event<ISynchronizer<IMutableQuote>> event = _quoteEvents.get(symbol);
 					
 					IMutableQuote quote = _quotes.get(symbol);
@@ -214,6 +216,12 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"observer\" argument is required.");
 		}
 		
+		final IQuote quote = _quotes.get(symbol);
+		
+		if (quote != null) {
+			observer.execute(new QuoteCopySynchronizer(quote));
+		}
+		
 		synchronized (_quoteEvents) {
 			if (!_quoteEvents.containsKey(symbol)) {
 				_quoteEvents.putIfAbsent(symbol, new Event<ISynchronizer<IMutableQuote>>(String.format("%s quoteUpdated", symbol)));
@@ -269,6 +277,12 @@ public final class MarketSocketConnection extends SocketConnection {
 		
 		if (observer == null) {
 			throw new IllegalArgumentException("The \"observer\" argument is required.");
+		}
+		
+		final IQuote quote = _quotes.get(symbol);
+		
+		if (quote != null) {
+			observer.execute(new QuoteCopySynchronizer(quote));
 		}
 		
 		synchronized (_priceChangeEvents) {
