@@ -24,7 +24,7 @@ public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
 	}
 
 	@Override
-	public void synchronize(IMutableQuote target) {
+	public void synchronize(final IMutableQuote target) {
 		if (target == null) {
 			throw new IllegalArgumentException("The \"target\" argument is required.");
 		}
@@ -33,7 +33,7 @@ public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
 			throw new IllegalArgumentException(String.format("The synchronizer does not apply to the \"target\" (target symbol: %s).", target.getSymbol()));
 		}
 		
-		JSONArray names = _data.names();
+		final JSONArray names = _data.names();
 			
 		for (int i = 0; i < names.length(); i++) {
 			final String name = names.optString(i);
@@ -41,6 +41,30 @@ public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
 			if (name != null) {
 				synchronizeProperty(target, name); 
 			}
+		}
+		
+		if (_data.has("lastPrice") || _data.has("previousPrice")) {
+			final Double lastPrice = target.getLastPrice();
+			final Double previousPrice = target.getPreviousPrice();
+			
+			final Double priceChange;
+			final Double priceChangePercent;
+			
+			if (null != lastPrice && null != previousPrice) {
+				priceChange = Double.valueOf(lastPrice.doubleValue() - previousPrice.doubleValue());
+				
+				if (previousPrice.doubleValue() != 0) {
+					priceChangePercent = Double.valueOf(priceChange.doubleValue() / previousPrice.doubleValue());
+				} else {
+					priceChangePercent = null;
+				}
+			} else {
+				priceChange = null;
+				priceChangePercent = null;
+			}
+			
+			target.setPriceChange(priceChange);
+			target.setPriceChangePercent(priceChangePercent);
 		}
 	}
 	

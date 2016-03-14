@@ -24,7 +24,7 @@ import com.barchart.streaming.data.Profile;
 import io.socket.emitter.Emitter;
 
 public final class MarketSocketConnection extends SocketConnection {
-	private static final Logger logger = LoggerFactory.getLogger(MarketSocketConnection.class);
+	private static final Logger logger;
 	
 	private final ConcurrentMap<String, IProfile> _profiles;
 	private final ConcurrentMap<String, IMutableQuote> _quotes;
@@ -33,6 +33,10 @@ public final class MarketSocketConnection extends SocketConnection {
 	private final ConcurrentMap<String, Event<ISynchronizer<IMutableQuote>>> _priceChangeEvents;
 	
 	private final Event<String> _timestampEvent;
+	
+	static {
+		logger = LoggerFactory.getLogger(MarketSocketConnection.class);
+	}
 	
 	public MarketSocketConnection() {
 		this("jerq-aggregator-prod.aws.barchart.com", 80, false);
@@ -346,6 +350,24 @@ public final class MarketSocketConnection extends SocketConnection {
 		}
 	}
 	
+	private IProfile updateProfile(final String symbol, final JSONObject data) {
+		final IProfile profile = new Profile(
+				symbol, 
+				data.optString("name"),
+				data.optString("exchange"),
+				data.optString("unitCode"),
+				data.optString("pointValue"),
+				data.optString("tickIncrement"),
+				data.optString("root"),
+				data.optString("month"),
+				data.optString("year")
+			);
+
+		_profiles.put(symbol, profile);
+		
+		return profile;
+	}
+	
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -377,23 +399,5 @@ public final class MarketSocketConnection extends SocketConnection {
 		}
 		
 		return returnRef;
-	}
-	
-	private IProfile updateProfile(final String symbol, final JSONObject data) {
-		final IProfile profile = new Profile(
-				symbol, 
-				data.optString("name"),
-				data.optString("exchange"),
-				data.optString("unitCode"),
-				data.optString("pointValue"),
-				data.optString("tickIncrement"),
-				data.optString("root"),
-				data.optString("month"),
-				data.optString("year")
-			);
-
-		_profiles.put(symbol, profile);
-		
-		return profile;
 	}
 }
