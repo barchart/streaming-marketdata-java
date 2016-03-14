@@ -3,10 +3,10 @@ package com.barchart.streaming.connection.synchronizers;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.barchart.common.data.ISynchronizer;
-import com.barchart.streaming.data.IMutableQuote;
+import com.barchart.common.data.Synchronizer;
+import com.barchart.streaming.data.MutableQuote;
 
-public class QuoteUpdateSynchronizer implements ISynchronizer<IMutableQuote> {
+public class QuoteUpdateSynchronizer implements Synchronizer<MutableQuote> {
 	public final String _symbol;
 	public final JSONObject _data;
 	
@@ -24,7 +24,7 @@ public class QuoteUpdateSynchronizer implements ISynchronizer<IMutableQuote> {
 	}
 
 	@Override
-	public void synchronize(final IMutableQuote target) {
+	public void synchronize(final MutableQuote target) {
 		if (target == null) {
 			throw new IllegalArgumentException("The \"target\" argument is required.");
 		}
@@ -68,7 +68,7 @@ public class QuoteUpdateSynchronizer implements ISynchronizer<IMutableQuote> {
 		}
 	}
 	
-	private void synchronizeProperty(final IMutableQuote target, final String name) {
+	private void synchronizeProperty(final MutableQuote target, final String name) {
 		switch (name) {
 			case "sequence": {
 				target.setSequence(Integer.valueOf(_data.optInt(name)));

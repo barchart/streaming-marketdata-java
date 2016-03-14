@@ -1,8 +1,8 @@
 package com.barchart.streaming.connection;
 
-import com.barchart.common.transport.ISocketChannel;
+import com.barchart.common.transport.SocketChannel;
 
-enum MarketSocketChannel implements ISocketChannel {
+enum MarketSocketChannel implements SocketChannel {
 	RequestProfile("request/profile"),
 	Response("response"),
 	

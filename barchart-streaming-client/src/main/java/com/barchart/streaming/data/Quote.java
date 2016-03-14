@@ -1,6 +1,6 @@
 package com.barchart.streaming.data;
 
-public interface IQuote {
+public interface Quote {
 	String getSymbol();
 	
 	Integer getSequence();

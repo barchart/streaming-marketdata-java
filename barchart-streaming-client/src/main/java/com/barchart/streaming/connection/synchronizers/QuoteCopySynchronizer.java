@@ -1,10 +1,10 @@
 package com.barchart.streaming.connection.synchronizers;
 
-import com.barchart.common.data.ISynchronizer;
-import com.barchart.streaming.data.IMutableQuote;
-import com.barchart.streaming.data.IQuote;
+import com.barchart.common.data.Synchronizer;
+import com.barchart.streaming.data.MutableQuote;
+import com.barchart.streaming.data.Quote;
 
-public class QuoteCopySynchronizer implements ISynchronizer<IMutableQuote> {
+public class QuoteCopySynchronizer implements Synchronizer<MutableQuote> {
 	private final String _symbol;
 	
 	private final Integer _sequence;
@@ -42,7 +42,7 @@ public class QuoteCopySynchronizer implements ISynchronizer<IMutableQuote> {
 	private final String _time;
 	private final String _timeDisplay;
 	
-	public QuoteCopySynchronizer(IQuote quote) {
+	public QuoteCopySynchronizer(Quote quote) {
 		if (quote == null) {
 			throw new IllegalArgumentException("The \"quote\" argument is required.");
 		}
@@ -86,7 +86,7 @@ public class QuoteCopySynchronizer implements ISynchronizer<IMutableQuote> {
 	}
 
 	@Override
-	public void synchronize(final IMutableQuote target) {
+	public void synchronize(final MutableQuote target) {
 		if (target == null) {
 			throw new IllegalArgumentException("The \"target\" argument is required.");
 		}

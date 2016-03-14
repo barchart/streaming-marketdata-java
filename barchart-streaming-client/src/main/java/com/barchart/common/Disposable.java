@@ -1,5 +1,5 @@
 package com.barchart.common;
 
-public interface IDisposable {
+public interface Disposable {
 	void dispose();
 }

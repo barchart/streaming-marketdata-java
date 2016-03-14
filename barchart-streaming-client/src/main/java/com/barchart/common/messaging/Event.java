@@ -3,33 +3,33 @@ package com.barchart.common.messaging;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.barchart.common.IAction;
-import com.barchart.common.IDisposable;
+import com.barchart.common.Action;
+import com.barchart.common.Disposable;
 
 public class Event<T> {
 	private final String _name;
 	
-	private Set<IAction<T>> _observers;
+	private Set<Action<T>> _observers;
 	private final Object _observersLock;
 
 	public Event(final String name) {
 		_name = name;
 		
-		_observers = new LinkedHashSet<IAction<T>>();
+		_observers = new LinkedHashSet<Action<T>>();
 		_observersLock = new Object();
 	}
 	
-	public IDisposable register(final IAction<T> observer) {
+	public Disposable register(final Action<T> observer) {
 		if (observer == null) {
 			throw new IllegalArgumentException("The \"observer\" argument cannot be null.");
 		}
 		
-		final IDisposable returnRef;
+		final Disposable returnRef;
 		
 		synchronized (_observersLock) {
-			final Set<IAction<T>> copy = new LinkedHashSet<IAction<T>>();
+			final Set<Action<T>> copy = new LinkedHashSet<Action<T>>();
 			
-			for (final IAction<T> existing : _observers) {
+			for (final Action<T> existing : _observers) {
 				copy.add(existing);
 			}
 			
@@ -37,7 +37,7 @@ public class Event<T> {
 			
 			_observers = copy;
 			
-			returnRef = new IDisposable() {
+			returnRef = new Disposable() {
 				@Override
 				public void dispose() {
 					unregister(observer);
@@ -48,16 +48,16 @@ public class Event<T> {
 		return returnRef;
 	}
 	
-	public void unregister(final IAction<T> observer) {
+	public void unregister(final Action<T> observer) {
 		if (observer == null) {
 			throw new IllegalArgumentException("The \"observer\" argument cannot be null.");
 		}
 		
 		synchronized (_observersLock) {
 			if (_observers.contains(observer)) {
-				final Set<IAction<T>> copy = new LinkedHashSet<IAction<T>>();
+				final Set<Action<T>> copy = new LinkedHashSet<Action<T>>();
 				
-				for (final IAction<T> existing : _observers) {
+				for (final Action<T> existing : _observers) {
 					if (existing != observer) {
 						copy.add(existing);
 					}
@@ -69,9 +69,9 @@ public class Event<T> {
 	}
 	
 	public void fire(T data) {
-		final Iterable<IAction<T>> observers = _observers;
+		final Iterable<Action<T>> observers = _observers;
 		
-		for (final IAction<T> observer : observers) {
+		for (final Action<T> observer : observers) {
 			observer.execute(data);
 		}
 	}

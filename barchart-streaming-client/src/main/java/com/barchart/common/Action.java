@@ -1,5 +1,5 @@
 package com.barchart.common;
 
-public interface IAction<TData> {
+public interface Action<TData> {
 	void execute(TData data);
 }

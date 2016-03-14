@@ -6,13 +6,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.barchart.common.IAction;
-import com.barchart.common.data.ISynchronizer;
+import com.barchart.common.Action;
+import com.barchart.common.data.Synchronizer;
 import com.barchart.common.transport.SocketConnectionState;
 import com.barchart.streaming.connection.MarketSocketConnection;
-import com.barchart.streaming.data.IMutableQuote;
-import com.barchart.streaming.data.IProfile;
 import com.barchart.streaming.data.MutableQuote;
+import com.barchart.streaming.data.Profile;
+import com.barchart.streaming.data.BasicMutableQuote;
 
 public class RealtimeTestClient {
 	private static final Logger logger;
@@ -28,15 +28,15 @@ public class RealtimeTestClient {
 		
 		final MarketSocketConnection c = new MarketSocketConnection("jerq-aggregator-test.us-east-1.elasticbeanstalk.com", 80, false);
 		
-		c.registerConnectionStateChangeObserver(new IAction<SocketConnectionState>() {
+		c.registerConnectionStateChangeObserver(new Action<SocketConnectionState>() {
 			@Override
 			public void execute(SocketConnectionState data) {
 				workQueue.add(String.format("Connection state changed to %s", data));
 				
 				if (data == SocketConnectionState.Connected) {
-					c.requestProfile("TSLA", new IAction<IProfile>() {
+					c.requestProfile("TSLA", new Action<Profile>() {
 						@Override
-						public void execute(IProfile profile) {
+						public void execute(Profile profile) {
 							workQueue.add(String.format("Profile request fulfilled %s.", profile));
 						}
 					});
@@ -44,11 +44,11 @@ public class RealtimeTestClient {
 			}
 		});
 
-		final IMutableQuote eurusd = new MutableQuote("^EURUSD");
+		final MutableQuote eurusd = new BasicMutableQuote("^EURUSD");
 		
-		c.subscribeToQuotes(eurusd.getSymbol(), new IAction<ISynchronizer<IMutableQuote>>() {
+		c.subscribeToQuotes(eurusd.getSymbol(), new Action<Synchronizer<MutableQuote>>() {
 			@Override
-			public void execute(ISynchronizer<IMutableQuote> synchronizer) {
+			public void execute(Synchronizer<MutableQuote> synchronizer) {
 				synchronizer.synchronize(eurusd);
 				
 				workQueue.add(String.format("Quote synchronizer received: %s", synchronizer));
@@ -56,11 +56,11 @@ public class RealtimeTestClient {
 			}
 		});
 		
-		final IMutableQuote tsla = new MutableQuote("TSLA");
+		final MutableQuote tsla = new BasicMutableQuote("TSLA");
 				
-		c.subscribeToPriceChanges(tsla.getSymbol(), new IAction<ISynchronizer<IMutableQuote>>() {
+		c.subscribeToPriceChanges(tsla.getSymbol(), new Action<Synchronizer<MutableQuote>>() {
 			@Override
-			public void execute(ISynchronizer<IMutableQuote> synchronizer) {
+			public void execute(Synchronizer<MutableQuote> synchronizer) {
 				synchronizer.synchronize(tsla);
 				
 				workQueue.add(String.format("Quote synchronizer received: %s", synchronizer));

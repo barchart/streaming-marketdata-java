@@ -17,15 +17,15 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.barchart.common.IAction;
-import com.barchart.common.IDisposable;
+import com.barchart.common.Action;
+import com.barchart.common.Disposable;
 import com.barchart.common.messaging.Event;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
-public abstract class SocketConnection implements IDisposable {
+public abstract class SocketConnection implements Disposable {
 	private static final Logger logger;
 	private static final AtomicInteger socketCounter;
 	
@@ -43,7 +43,7 @@ public abstract class SocketConnection implements IDisposable {
 	
 	private final Event<SocketConnectionState> _connectionStateChanged;
 	
-	private final ConcurrentMap<String, IAction<JSONObject>> _requestMap;
+	private final ConcurrentMap<String, Action<JSONObject>> _requestMap;
 	
 	static {
 		logger = LoggerFactory.getLogger(SocketConnection.class);
@@ -90,7 +90,7 @@ public abstract class SocketConnection implements IDisposable {
 		
 		_connectionStateChanged = new Event<SocketConnectionState>("connectionStateChanged");
 		
-		_requestMap = new ConcurrentHashMap<String, IAction<JSONObject>>(16, 0.75f, 2);
+		_requestMap = new ConcurrentHashMap<String, Action<JSONObject>>(16, 0.75f, 2);
 		
 		registerSocketEventListener(Socket.EVENT_CONNECT, new Emitter.Listener() {
 			@Override
@@ -135,16 +135,16 @@ public abstract class SocketConnection implements IDisposable {
 			}
 		});
 		
-		registerSocketEventListener(SocketChannel.Response, new Emitter.Listener() {
+		registerSocketEventListener(BasicSocketChannel.Response, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
 				final JSONObject data = (JSONObject)args[0];
 				
 				final String requestId = data.optString("requestId");
 
-				logMessageReceipt(SocketChannel.Response, data);
+				logMessageReceipt(BasicSocketChannel.Response, data);
 				
-				IAction<JSONObject> responseHandler = _requestMap.remove(requestId);
+				Action<JSONObject> responseHandler = _requestMap.remove(requestId);
 				
 				if (responseHandler != null) {
 					responseHandler.execute(data.optJSONObject("response"));
@@ -175,11 +175,11 @@ public abstract class SocketConnection implements IDisposable {
 		return;
 	}
 
-	public final IDisposable registerConnectionStateChangeObserver(IAction<SocketConnectionState> observer) {
+	public final Disposable registerConnectionStateChangeObserver(Action<SocketConnectionState> observer) {
 		return _connectionStateChanged.register(observer);
 	}
 	
-	protected final IDisposable registerSocketEventListener(final ISocketChannel socketChannel, final Emitter.Listener listener) {
+	protected final Disposable registerSocketEventListener(final SocketChannel socketChannel, final Emitter.Listener listener) {
 		if (socketChannel == null) {
 			throw new IllegalArgumentException("The \"socketChannel\" argument is required.");
 		}
@@ -193,7 +193,7 @@ public abstract class SocketConnection implements IDisposable {
 		return registerSocketEventListener(socketChannel.getChannelName(), listener);
 	}
 	
-	protected final void unregisterSocketEventListener(final ISocketChannel socketChannel, final Emitter.Listener listener) {
+	protected final void unregisterSocketEventListener(final SocketChannel socketChannel, final Emitter.Listener listener) {
 		if (socketChannel == null) {
 			throw new IllegalArgumentException("The \"socketChannel\" argument is required.");
 		}
@@ -205,10 +205,10 @@ public abstract class SocketConnection implements IDisposable {
 		unregisterSocketEventListener(socketChannel.getChannelName(), listener);
 	}
 	
-	private IDisposable registerSocketEventListener(final String socketChannelName, final Emitter.Listener listener) {
+	private Disposable registerSocketEventListener(final String socketChannelName, final Emitter.Listener listener) {
 		_socket.on(socketChannelName, listener);
 		
-		return new IDisposable() {
+		return new Disposable() {
 			@Override
 			public void dispose() {
 				unregisterSocketEventListener(socketChannelName, listener);
@@ -220,7 +220,7 @@ public abstract class SocketConnection implements IDisposable {
 		_socket.off(socketChannelName, listener);
 	}
 	
-	protected final void sendToServer(final ISocketChannel socketChannel, final JSONObject data) {
+	protected final void sendToServer(final SocketChannel socketChannel, final JSONObject data) {
 		if (socketChannel == null) {
 			throw new IllegalArgumentException("The \"socketChannel\" argument is required.");
 		}
@@ -244,7 +244,7 @@ public abstract class SocketConnection implements IDisposable {
         }
 	}
 	
-	protected final void requestFromServer(final ISocketChannel socketChannel, final JSONObject data, final IAction<JSONObject> callback) {
+	protected final void requestFromServer(final SocketChannel socketChannel, final JSONObject data, final Action<JSONObject> callback) {
 		if (socketChannel == null) {
 			throw new IllegalArgumentException("The \"socketChannel\" argument is required.");
 		}
@@ -358,7 +358,7 @@ public abstract class SocketConnection implements IDisposable {
 		return String.format("%s://%s:%s", protocol, hostToUse, port);
 	}
 	
-	protected void logMessageReceipt(final ISocketChannel socketChannel, JSONObject data) {
+	protected void logMessageReceipt(final SocketChannel socketChannel, JSONObject data) {
 		final int socketSequence = _socketSequence.incrementAndGet();
 		
     	logger.debug("Received message {} on {}", socketSequence, socketChannel);

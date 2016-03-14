@@ -1,5 +1,5 @@
 package com.barchart.common.data;
 
-public interface ISynchronizer<T> {
+public interface Synchronizer<T> {
 	void synchronize(T target);
 }
