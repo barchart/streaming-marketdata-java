@@ -27,7 +27,6 @@ import io.socket.emitter.Emitter;
 
 public abstract class SocketConnection implements IDisposable {
 	private static final Logger logger;
-	
 	private static final AtomicInteger socketCounter;
 	
 	private final int _id;
@@ -69,7 +68,7 @@ public abstract class SocketConnection implements IDisposable {
 		
 		Socket socket;
 		
-		logger.info("Creating socket.io connection to (host: %s, port: %s, secure: %s)", host, port, secure);
+		logger.info("Creating socket.io connection to (host: {}, port: {}, secure: {})", host, port, secure);
 		
 		final String serverUri = getServerUri(_host, _port, _secure);
 		
@@ -278,7 +277,7 @@ public abstract class SocketConnection implements IDisposable {
 		
 		synchronized (_connectionLock) {
 			if (connectionState != _connectionState) {
-				if (!_connectionState.canTransitionTo(connectionState)) {
+				if (_connectionState.canTransitionTo(connectionState)) {
 					logger.debug("Changing socket connection state to {}", connectionState);
 					
 					onConnectionStateChanged(_connectionState = connectionState);
