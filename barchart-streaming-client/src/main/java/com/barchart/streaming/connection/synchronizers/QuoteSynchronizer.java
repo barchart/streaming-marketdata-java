@@ -50,7 +50,7 @@ public class QuoteSynchronizer implements ISynchronizer<IMutableQuote> {
 			final Double priceChange;
 			final Double priceChangePercent;
 			
-			if (null != lastPrice && null != previousPrice) {
+			if (lastPrice != null && previousPrice != null) {
 				priceChange = Double.valueOf(lastPrice.doubleValue() - previousPrice.doubleValue());
 				
 				if (previousPrice.doubleValue() != 0) {
