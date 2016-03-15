@@ -26,7 +26,7 @@ public class StreamingTestClient {
 	public static void main(String[] args) {
 		final BlockingQueue<String> workQueue = new LinkedBlockingQueue<String>();
 		
-		final MarketSocketConnection c = new MarketSocketConnection("jerq-aggregator-test.us-east-1.elasticbeanstalk.com", 80, false);
+		final MarketSocketConnection c = new MarketSocketConnection();
 		
 		c.registerConnectionStateChangeObserver(new Action<SocketConnectionState>() {
 			@Override
