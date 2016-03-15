@@ -29,21 +29,21 @@ public abstract class SocketConnection implements Disposable {
 	private static final Logger logger;
 	private static final AtomicInteger socketCounter;
 	
-	private final int _id;
+	private final int id;
 	
-	private final String _host;
-	private final int _port;
-	private final boolean _secure;
+	private final String host;
+	private final int port;
+	private final boolean secure;
 	
-	private final Socket _socket;
-	private final AtomicInteger _socketSequence;
+	private final Socket socket;
+	private final AtomicInteger messageSequencer;
 	
-	private SocketConnectionState _connectionState;
-	private final Object _connectionLock;
+	private SocketConnectionState connectionState;
+	private final Object connectionLock;
 	
-	private final Event<SocketConnectionState> _connectionStateChanged;
+	private final Event<SocketConnectionState> connectionStateChanged;
 	
-	private final ConcurrentMap<String, Action<JSONObject>> _requestMap;
+	private final ConcurrentMap<String, Action<JSONObject>> requestMap;
 	
 	static {
 		logger = LoggerFactory.getLogger(SocketConnection.class);
@@ -60,17 +60,17 @@ public abstract class SocketConnection implements Disposable {
 			throw new IllegalArgumentException("The \"port\" is not a valid TCP port number.");
 		}
 		
-		_id = socketCounter.incrementAndGet();
+		this.id = socketCounter.incrementAndGet();
 		
-		_host = host;
-		_port = port;
-		_secure = secure;
+		this.host = host;
+		this.port = port;
+		this.secure = secure;
 		
 		Socket socket;
 		
 		logger.info("Creating socket.io connection to (host: {}, port: {}, secure: {})", host, port, secure);
 		
-		final String serverUri = getServerUri(_host, _port, _secure);
+		final String serverUri = getServerUri(host, port, secure);
 		
 		logger.info("Attempting to open socket.io connection to {}", serverUri);
 		
@@ -82,15 +82,15 @@ public abstract class SocketConnection implements Disposable {
 			socket = null;
 		}
 		
-		_socket = socket;
-		_socketSequence = new AtomicInteger(0);
+		this.socket = socket;
+		this.messageSequencer = new AtomicInteger(0);
 		
-		_connectionState = _socket == null ? SocketConnectionState.Invalid : SocketConnectionState.Disconnected;
-		_connectionLock = new Object();
+		this.connectionState = socket == null ? SocketConnectionState.Invalid : SocketConnectionState.Disconnected;
+		this.connectionLock = new Object();
 		
-		_connectionStateChanged = new Event<SocketConnectionState>("connectionStateChanged");
+		this.connectionStateChanged = new Event<SocketConnectionState>("connectionStateChanged");
 		
-		_requestMap = new ConcurrentHashMap<String, Action<JSONObject>>(16, 0.75f, 2);
+		this.requestMap = new ConcurrentHashMap<String, Action<JSONObject>>(16, 0.75f, 2);
 		
 		registerSocketEventListener(Socket.EVENT_CONNECT, new Emitter.Listener() {
 			@Override
@@ -131,7 +131,7 @@ public abstract class SocketConnection implements Disposable {
 		registerSocketEventListener(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
-				logger.warn("A socket.io {} event occurred. Current state is {}. Error: {}.", Socket.EVENT_CONNECT_ERROR, _connectionState, args[0]);
+				logger.warn("A socket.io {} event occurred. Current state is {}. Error: {}.", Socket.EVENT_CONNECT_ERROR, connectionState, args[0]);
 			}
 		});
 		
@@ -144,7 +144,7 @@ public abstract class SocketConnection implements Disposable {
 
 				logMessageReceipt(BasicSocketChannel.Response, data);
 				
-				Action<JSONObject> responseHandler = _requestMap.remove(requestId);
+				Action<JSONObject> responseHandler = requestMap.remove(requestId);
 				
 				if (responseHandler != null) {
 					responseHandler.execute(data.optJSONObject("response"));
@@ -159,7 +159,7 @@ public abstract class SocketConnection implements Disposable {
 		logger.debug("Staring manual connection attempt.");
 		
 		if (changeConnectionState(SocketConnectionState.Connecting, true)) {
-			_socket.connect();
+			socket.connect();
 		}
 	}
 	
@@ -167,7 +167,7 @@ public abstract class SocketConnection implements Disposable {
 		logger.debug("Staring manual disconnect attempt.");
 		
 		if (changeConnectionState(SocketConnectionState.Disconnecting, true)) {
-			_socket.disconnect();
+			socket.disconnect();
 		}
 	}
 	
@@ -176,7 +176,7 @@ public abstract class SocketConnection implements Disposable {
 	}
 
 	public final Disposable registerConnectionStateChangeObserver(Action<SocketConnectionState> observer) {
-		return _connectionStateChanged.register(observer);
+		return connectionStateChanged.register(observer);
 	}
 	
 	protected final Disposable registerSocketEventListener(final SocketChannel socketChannel, final Emitter.Listener listener) {
@@ -206,7 +206,7 @@ public abstract class SocketConnection implements Disposable {
 	}
 	
 	private Disposable registerSocketEventListener(final String socketChannelName, final Emitter.Listener listener) {
-		_socket.on(socketChannelName, listener);
+		socket.on(socketChannelName, listener);
 		
 		return new Disposable() {
 			@Override
@@ -217,7 +217,7 @@ public abstract class SocketConnection implements Disposable {
 	}
 	
 	private void unregisterSocketEventListener(final String socketChannelName, final Emitter.Listener listener) {
-		_socket.off(socketChannelName, listener);
+		socket.off(socketChannelName, listener);
 	}
 	
 	protected final void sendToServer(final SocketChannel socketChannel, final JSONObject data) {
@@ -229,18 +229,18 @@ public abstract class SocketConnection implements Disposable {
 			throw new IllegalArgumentException("The \"data\" argument is required.");
 		}
 		
-        if (this._connectionState.getCanTransmit()) {
-        	int socketSequence = _socketSequence.incrementAndGet();
+        if (this.connectionState.getCanTransmit()) {
+        	int messageSequence = messageSequencer.incrementAndGet();
         	
-        	logger.debug("Sending message {} to {}", socketSequence, socketChannel);
+        	logger.debug("Sending message {} to {}", messageSequence, socketChannel);
         	
         	if (logger.isTraceEnabled()) {        		
-        		logger.trace("Payload for message {}:\n{}", socketSequence, stringify(data));
+        		logger.trace("Payload for message {}:\n{}", messageSequence, stringify(data));
         	}
         	
-            _socket.emit(socketChannel.getChannelName(), data);
+            socket.emit(socketChannel.getChannelName(), data);
             
-            logger.debug("Sent message {} to {}", socketSequence, socketChannel);
+            logger.debug("Sent message {} to {}", messageSequence, socketChannel);
         }
 	}
 	
@@ -256,7 +256,7 @@ public abstract class SocketConnection implements Disposable {
 		final UUID requestUuid = UUID.randomUUID();
 		final String requestId = requestUuid.toString();
 		
-		_requestMap.put(requestId, callback);
+		requestMap.put(requestId, callback);
 		
 		JSONObject envelope = new JSONObject();
 		
@@ -272,24 +272,24 @@ public abstract class SocketConnection implements Disposable {
 		sendToServer(socketChannel, envelope);
 	}
     
-	private boolean changeConnectionState(final SocketConnectionState connectionState, final boolean ignoreInvalidStateChange) {
+	private boolean changeConnectionState(final SocketConnectionState targetState, final boolean ignoreInvalidStateChange) {
 		boolean returnVal = false;
 		
-		synchronized (_connectionLock) {
-			if (connectionState != _connectionState) {
-				if (_connectionState.canTransitionTo(connectionState)) {
+		synchronized (connectionLock) {
+			if (connectionState != targetState) {
+				if (connectionState.canTransitionTo(targetState)) {
 					logger.debug("Changing socket connection state to {}", connectionState);
 					
-					onConnectionStateChanged(_connectionState = connectionState);
+					onConnectionStateChanged(connectionState = targetState);
 					
-					_connectionStateChanged.fire(_connectionState);
+					connectionStateChanged.fire(targetState);
 					
-					logger.debug("Changed socket connection state to {}", _connectionState);
+					logger.debug("Changed socket connection state to {}", targetState);
 					
 					returnVal = true;
 				} else {
 					if (!ignoreInvalidStateChange) {
-						throw new IllegalStateException(String.format("Unable to change connection from %s to %s", _connectionState, connectionState));
+						throw new IllegalStateException(String.format("Unable to change connection from %s to %s", connectionState, targetState));
 					}
 				}
 			}
@@ -309,7 +309,7 @@ public abstract class SocketConnection implements Disposable {
 	
 	@Override
 	public String toString() {
-		return String.format("[SocketConnection (id: %s, host: %s, port: %s, secure: %s)]", _id, _host, _port, _secure);
+		return String.format("[SocketConnection (id: %s, host: %s, port: %s, secure: %s)]", id, host, port, secure);
 	}
 	
 	private static final String getServerUri(final String host, final int port, final boolean secure) {
@@ -359,12 +359,12 @@ public abstract class SocketConnection implements Disposable {
 	}
 	
 	protected void logMessageReceipt(final SocketChannel socketChannel, JSONObject data) {
-		final int socketSequence = _socketSequence.incrementAndGet();
+		final int messageSequence = messageSequencer.incrementAndGet();
 		
-    	logger.debug("Received message {} on {}", socketSequence, socketChannel);
+    	logger.debug("Received message {} on {}", messageSequence, socketChannel);
     	
     	if (logger.isTraceEnabled()) {        		
-    		logger.trace("Payload for message {}:\n{}", socketSequence, stringify(data));
+    		logger.trace("Payload for message {}:\n{}", messageSequence, stringify(data));
     	}
 	}
 	

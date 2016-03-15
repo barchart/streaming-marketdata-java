@@ -1,75 +1,79 @@
 package com.barchart.streaming.data;
 
 public class BasicProfile implements Profile {
-	private final String _symbol;
-	private final String _name;
-	private final String _exchange;
-	private final String _unitCode;
-	private final String _pointValue;
-	private final String _tickIncrement;
-	private final String _root;
-	private final String _month;
-	private final String _year;
+	private final String symbol;
+	
+	private final String name;
+	private final String exchange;
+	private final String unitCode;
+	private final String pointValue;
+	private final String tickIncrement;
+	
+	private final String root;
+	private final String month;
+	private final String year;
 	
 	public BasicProfile(final String symbol, final String name, final String exchange, final String unitCode, final String pointValue, final String tickIncrement, final String root, final String month, final String year) {
-		_symbol = symbol;
-		_name = name;
-		_exchange = exchange;
-		_unitCode = unitCode;
-		_pointValue = pointValue;
-		_tickIncrement = tickIncrement;
-		_root = root;
-		_month = month;
-		_year = year;
+		this.symbol = symbol;
+		
+		this.name = name;
+		this.exchange = exchange;
+		this.unitCode = unitCode;
+		this.pointValue = pointValue;
+		this.tickIncrement = tickIncrement;
+		
+		this.root = root;
+		this.month = month;
+		this.year = year;
 	}
 
 	@Override
 	public String getSymbol() {
-		return _symbol;
+		return symbol;
 	}
 
 	@Override
 	public String getName() {
-		return _name;
+		return name;
 	}
 
 	@Override
 	public String getExchange() {
-		return _exchange;
+		return exchange;
 	}
 
 	@Override
 	public String getUnitCode() {
-		return _unitCode;
+		return unitCode;
 	}
 
 	@Override
 	public String getPointValue() {
-		return _pointValue;
+		return pointValue;
 	}
 
 	@Override
 	public String getTickIncrement() {
-		return _tickIncrement;
+		return tickIncrement;
 	}
 
 	@Override
 	public String getRoot() {
-		return _root;
+		return root;
 	}
 
 	@Override
 	public String getMonth() {
-		return _month;
+		return month;
 	}
 
 	@Override
 	public String getYear() {
-		return _year;
+		return year;
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("[BasicProfile (symbol: %s)]", _symbol);
+		return String.format("[BasicProfile (symbol: %s)]", symbol);
 	}
 }

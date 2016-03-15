@@ -28,13 +28,13 @@ import io.socket.emitter.Emitter;
 public final class MarketSocketConnection extends SocketConnection {
 	private static final Logger logger;
 	
-	private final ConcurrentMap<String, Profile> _profiles;
-	private final ConcurrentMap<String, MutableQuote> _quotes;
+	private final ConcurrentMap<String, Profile> profiles;
+	private final ConcurrentMap<String, MutableQuote> quotes;
 	
-	private final ConcurrentMap<String, Event<Synchronizer<MutableQuote>>> _quoteEvents;
-	private final ConcurrentMap<String, Event<Synchronizer<MutableQuote>>> _priceChangeEvents;
+	private final ConcurrentMap<String, Event<Synchronizer<MutableQuote>>> quoteEvents;
+	private final ConcurrentMap<String, Event<Synchronizer<MutableQuote>>> priceChangeEvents;
 	
-	private final Event<String> _timestampEvent;
+	private final Event<String> timestampEvent;
 	
 	static {
 		logger = LoggerFactory.getLogger(MarketSocketConnection.class);
@@ -51,13 +51,13 @@ public final class MarketSocketConnection extends SocketConnection {
 	public MarketSocketConnection(final String host, final int port, final boolean secure) {
 		super(host, port, secure);
 		
-		_profiles = new ConcurrentHashMap<String, Profile>(64, 0.75f, 2);
-		_quotes = new ConcurrentHashMap<String, MutableQuote>(64, 0.75f, 2);
+		profiles = new ConcurrentHashMap<String, Profile>(64, 0.75f, 2);
+		quotes = new ConcurrentHashMap<String, MutableQuote>(64, 0.75f, 2);
 		
-		_quoteEvents = new ConcurrentHashMap<String, Event<Synchronizer<MutableQuote>>>(64, 0.75f, 2);
-		_priceChangeEvents = new ConcurrentHashMap<String, Event<Synchronizer<MutableQuote>>>(64, 0.75f, 2);
+		quoteEvents = new ConcurrentHashMap<String, Event<Synchronizer<MutableQuote>>>(64, 0.75f, 2);
+		priceChangeEvents = new ConcurrentHashMap<String, Event<Synchronizer<MutableQuote>>>(64, 0.75f, 2);
 		
-		_timestampEvent = new Event<String>("timestampUpdate");
+		timestampEvent = new Event<String>("timestampUpdate");
 		
 		registerSocketEventListener(MarketSocketChannel.Timestamp, new Emitter.Listener() {
 			public void call(Object... args) {
@@ -68,7 +68,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				final String timestamp = data.optString("timestamp");
 				
 				if (timestamp != null) {
-					_timestampEvent.fire(timestamp);
+					timestampEvent.fire(timestamp);
 				} else {
 					logger.warn("Unable to extract \"{}\" property from {}", "timestamp", MarketSocketChannel.Timestamp);
 				}
@@ -99,15 +99,15 @@ public final class MarketSocketConnection extends SocketConnection {
 					final Synchronizer<MutableQuote> synchronizer = new QuoteUpdateSynchronizer(symbol, data);
 					final MutableQuote quote = new BasicMutableQuote(symbol, synchronizer);
 					
-					_quotes.put(symbol, quote);
+					quotes.put(symbol, quote);
 					
-					final Event<Synchronizer<MutableQuote>> quoteEvent = _quoteEvents.get(symbol);
+					final Event<Synchronizer<MutableQuote>> quoteEvent = quoteEvents.get(symbol);
 					
 					if (quoteEvent != null) {
 						quoteEvent.fire(synchronizer);
 					}
 					
-					final Event<Synchronizer<MutableQuote>> priceUpdateEvent = _priceChangeEvents.get(symbol);
+					final Event<Synchronizer<MutableQuote>> priceUpdateEvent = priceChangeEvents.get(symbol);
 					
 					if (priceUpdateEvent != null) {
 						priceUpdateEvent.fire(synchronizer);
@@ -127,9 +127,9 @@ public final class MarketSocketConnection extends SocketConnection {
 				
 				if (symbol != null) {
 					final Synchronizer<MutableQuote> synchronizer = new QuoteUpdateSynchronizer(symbol, data);
-					Event<Synchronizer<MutableQuote>> event = _quoteEvents.get(symbol);
+					Event<Synchronizer<MutableQuote>> event = quoteEvents.get(symbol);
 					
-					MutableQuote quote = _quotes.get(symbol);
+					MutableQuote quote = quotes.get(symbol);
 					
 					if (quote != null) {
 						synchronizer.synchronize(quote);
@@ -148,21 +148,21 @@ public final class MarketSocketConnection extends SocketConnection {
 	@Override
 	protected void onConnectionStateChanged(SocketConnectionState connectionState) {
 		if (connectionState == SocketConnectionState.Connected) {
-			if (!_timestampEvent.getIsEmpty()) {
+			if (!timestampEvent.getIsEmpty()) {
 				sendToServer(MarketSocketChannel.SubscribeTimestamp, new JSONObject());
 			} else {
 				sendToServer(MarketSocketChannel.UnsubscribeTimestamp, new JSONObject());
 			}
 			
-			synchronized (_quoteEvents) {
-				if (!_quoteEvents.isEmpty()) {
-					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(_quoteEvents.keySet().toArray(new String[_quoteEvents.size()]), Boolean.TRUE, null));
+			synchronized (quoteEvents) {
+				if (!quoteEvents.isEmpty()) {
+					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(quoteEvents.keySet().toArray(new String[quoteEvents.size()]), Boolean.TRUE, null));
 				}
 			}
 			
-			synchronized (_priceChangeEvents) {
-				if (!_priceChangeEvents.isEmpty()) {
-					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(_priceChangeEvents.keySet().toArray(new String[_priceChangeEvents.size()]), null, Boolean.TRUE));
+			synchronized (priceChangeEvents) {
+				if (!priceChangeEvents.isEmpty()) {
+					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(priceChangeEvents.keySet().toArray(new String[priceChangeEvents.size()]), null, Boolean.TRUE));
 				}
 			}
 		}
@@ -173,10 +173,10 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"timestampHandler\" argument is required.");
 		}
 		
-		synchronized (_timestampEvent) {
-			final boolean empty = _timestampEvent.getIsEmpty();
+		synchronized (timestampEvent) {
+			final boolean empty = timestampEvent.getIsEmpty();
 			
-			_timestampEvent.register(timestampHandler);
+			timestampEvent.register(timestampHandler);
 			
 			if (empty) {
 				sendToServer(MarketSocketChannel.SubscribeTimestamp, new JSONObject());
@@ -196,12 +196,12 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"timestampHandler\" argument is required.");
 		}
 		
-		synchronized (_timestampEvent) {
-			boolean empty = _timestampEvent.getIsEmpty();
+		synchronized (timestampEvent) {
+			boolean empty = timestampEvent.getIsEmpty();
 			
-			_timestampEvent.unregister(timestampHandler);
+			timestampEvent.unregister(timestampHandler);
 			
-			if (!empty && _timestampEvent.getIsEmpty()) {
+			if (!empty && timestampEvent.getIsEmpty()) {
 				sendToServer(MarketSocketChannel.UnsubscribeTimestamp, new JSONObject());
 			}
 		}
@@ -216,18 +216,18 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"observer\" argument is required.");
 		}
 		
-		final Quote quote = _quotes.get(symbol);
+		final Quote quote = quotes.get(symbol);
 		
 		if (quote != null) {
 			observer.execute(new QuoteCopySynchronizer(quote));
 		}
 		
-		synchronized (_quoteEvents) {
-			if (!_quoteEvents.containsKey(symbol)) {
-				_quoteEvents.putIfAbsent(symbol, new Event<Synchronizer<MutableQuote>>(String.format("%s quoteUpdated", symbol)));
+		synchronized (quoteEvents) {
+			if (!quoteEvents.containsKey(symbol)) {
+				quoteEvents.putIfAbsent(symbol, new Event<Synchronizer<MutableQuote>>(String.format("%s quoteUpdated", symbol)));
 			}
 			
-			final Event<Synchronizer<MutableQuote>> quoteUpdated = _quoteEvents.get(symbol);
+			final Event<Synchronizer<MutableQuote>> quoteUpdated = quoteEvents.get(symbol);
 			final boolean empty = quoteUpdated.getIsEmpty();
 			
 			quoteUpdated.register(observer);
@@ -254,9 +254,9 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"observer\" argument is required.");
 		}
 		
-		synchronized (_quoteEvents) {
-			if (_quoteEvents.containsKey(symbol)) {
-				final Event<Synchronizer<MutableQuote>> quoteUpdated = _quoteEvents.get(symbol);
+		synchronized (quoteEvents) {
+			if (quoteEvents.containsKey(symbol)) {
+				final Event<Synchronizer<MutableQuote>> quoteUpdated = quoteEvents.get(symbol);
 				final boolean empty = quoteUpdated.getIsEmpty();
 				
 				quoteUpdated.unregister(observer);
@@ -264,7 +264,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				if (!empty && quoteUpdated.getIsEmpty()) {
 					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(new String[] { symbol }, Boolean.FALSE, null));
 					
-					_quoteEvents.remove(symbol);
+					quoteEvents.remove(symbol);
 				}
 			}
 		}
@@ -279,18 +279,18 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"observer\" argument is required.");
 		}
 		
-		final Quote quote = _quotes.get(symbol);
+		final Quote quote = quotes.get(symbol);
 		
 		if (quote != null) {
 			observer.execute(new QuoteCopySynchronizer(quote));
 		}
 		
-		synchronized (_priceChangeEvents) {
-			if (!_priceChangeEvents.containsKey(symbol)) {
-				_priceChangeEvents.put(symbol, new Event<Synchronizer<MutableQuote>>(String.format("%s priceUpdated", symbol)));
+		synchronized (priceChangeEvents) {
+			if (!priceChangeEvents.containsKey(symbol)) {
+				priceChangeEvents.put(symbol, new Event<Synchronizer<MutableQuote>>(String.format("%s priceUpdated", symbol)));
 			}
 			
-			final Event<Synchronizer<MutableQuote>> priceChanged = _priceChangeEvents.get(symbol);
+			final Event<Synchronizer<MutableQuote>> priceChanged = priceChangeEvents.get(symbol);
 			final boolean empty = priceChanged.getIsEmpty();
 			
 			priceChanged.register(observer);
@@ -317,9 +317,9 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"observer\" argument is required.");
 		}
 		
-		synchronized (_priceChangeEvents) {
-			if (_priceChangeEvents.containsKey(symbol)) {
-				final Event<Synchronizer<MutableQuote>> priceChanged = _priceChangeEvents.get(symbol);
+		synchronized (priceChangeEvents) {
+			if (priceChangeEvents.containsKey(symbol)) {
+				final Event<Synchronizer<MutableQuote>> priceChanged = priceChangeEvents.get(symbol);
 				final boolean empty = priceChanged.getIsEmpty();
 				
 				priceChanged.unregister(observer);
@@ -327,7 +327,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				if (!empty && priceChanged.getIsEmpty()) {
 					sendToServer(MarketSocketChannel.ChangeSymbolSubscription, getSymbolSubscriptionPayload(new String[] { symbol }, null, Boolean.FALSE));
 				
-					_priceChangeEvents.remove(symbol);
+					priceChangeEvents.remove(symbol);
 				}
 			}
 		}
@@ -338,7 +338,7 @@ public final class MarketSocketConnection extends SocketConnection {
 			throw new IllegalArgumentException("The \"symbol\" argument is required.");
 		}
 		
-		final Profile profile = _profiles.get(symbol);
+		final Profile profile = profiles.get(symbol);
 		
 		if (profile != null) {
 			callback.execute(profile);
@@ -377,7 +377,7 @@ public final class MarketSocketConnection extends SocketConnection {
 				data.optString("year")
 			);
 
-		_profiles.put(symbol, profile);
+		profiles.put(symbol, profile);
 		
 		return profile;
 	}

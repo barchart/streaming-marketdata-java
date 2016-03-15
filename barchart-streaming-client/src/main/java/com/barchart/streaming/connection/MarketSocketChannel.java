@@ -16,19 +16,19 @@ enum MarketSocketChannel implements SocketChannel {
 	
 	ProfileSnapshot("profile/snapshot");
 	
-	private final String _channelName;
+	private final String channelName;
 	
 	MarketSocketChannel(final String channelName) {
-		_channelName = channelName;
+		this.channelName = channelName;
 	}
 	
 	@Override
 	public String getChannelName() {
-		return _channelName;
+		return channelName;
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("[MarketSocketChannel (channelName: %s)]", _channelName);
+		return String.format("[MarketSocketChannel (channelName: %s)]", channelName);
 	}
 }

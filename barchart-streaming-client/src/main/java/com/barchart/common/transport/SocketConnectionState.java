@@ -14,47 +14,47 @@ public enum SocketConnectionState {
 	Disconnected("Disconnected", false, false),
 	Invalid("Invalid", false, false);
 	
-	private String _description;
+	private String description;
 	
-	private final boolean _canTransmit;
-	private final boolean _canReceive;
+	private final boolean canTransmit;
+	private final boolean canReceive;
 
-	private final static Map<SocketConnectionState, Set<SocketConnectionState>> _transitions;
+	private final static Map<SocketConnectionState, Set<SocketConnectionState>> transitions;
 	
 	static {
-		_transitions = new HashMap<SocketConnectionState, Set<SocketConnectionState>>();
+		transitions = new HashMap<SocketConnectionState, Set<SocketConnectionState>>();
 		
 		for (SocketConnectionState c : SocketConnectionState.values()) {
-			_transitions.put(c, new HashSet<SocketConnectionState>());
+			transitions.put(c, new HashSet<SocketConnectionState>());
 		}
 		
-		_transitions.get(SocketConnectionState.Uninitialized).add(SocketConnectionState.Initializing);
-		_transitions.get(SocketConnectionState.Initializing).add(SocketConnectionState.Connecting);
-		_transitions.get(SocketConnectionState.Connecting).add(SocketConnectionState.Connected);
-		_transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Disconnecting);
-		_transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Disconnected);
-		_transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Connecting);
-		_transitions.get(SocketConnectionState.Disconnecting).add(SocketConnectionState.Disconnected);
-		_transitions.get(SocketConnectionState.Disconnected).add(SocketConnectionState.Connecting);
+		transitions.get(SocketConnectionState.Uninitialized).add(SocketConnectionState.Initializing);
+		transitions.get(SocketConnectionState.Initializing).add(SocketConnectionState.Connecting);
+		transitions.get(SocketConnectionState.Connecting).add(SocketConnectionState.Connected);
+		transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Disconnecting);
+		transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Disconnected);
+		transitions.get(SocketConnectionState.Connected).add(SocketConnectionState.Connecting);
+		transitions.get(SocketConnectionState.Disconnecting).add(SocketConnectionState.Disconnected);
+		transitions.get(SocketConnectionState.Disconnected).add(SocketConnectionState.Connecting);
 	}
 	
 	SocketConnectionState(final String description, final boolean canTransmit, final boolean canReceive) {
-		_description = description;
+		this.description = description;
 		
-		_canTransmit = canTransmit;
-		_canReceive = canTransmit;
+		this.canTransmit = canTransmit;
+		this.canReceive = canTransmit;
 	}
 	
 	public final String getDescription() {
-		return _description;
+		return description;
 	}
 	
 	public final boolean getCanTransmit() {
-		return _canTransmit;
+		return canTransmit;
 	}
 	
 	public final boolean getCanReceive() {
-		return _canReceive;
+		return canReceive;
 	}
 	
 	public final boolean getCanConnect() {
@@ -66,11 +66,11 @@ public enum SocketConnectionState {
 	}
 	
 	public final boolean canTransitionTo(final SocketConnectionState connectionState) {
-		return _transitions.get(this).contains(connectionState);
+		return transitions.get(this).contains(connectionState);
 	}
 	
 	@Override
 	public String toString() {
-		return "[ConnectionState (description: " + _description + ")]";
+		return "[ConnectionState (description: " + description + ")]";
 	}
 }

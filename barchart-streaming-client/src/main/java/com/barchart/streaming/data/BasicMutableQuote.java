@@ -3,84 +3,84 @@ package com.barchart.streaming.data;
 import com.barchart.common.data.Synchronizer;
 
 public class BasicMutableQuote implements MutableQuote {
-	private final String _symbol;
+	private final String symbol;
 	
-	private Integer _sequence;
-	private boolean _online;
+	private Integer sequence;
+	private boolean online;
 		
-	private String _flag;
-	private String _mode;
-	private String _session;
+	private String flag;
+	private String mode;
+	private String session;
 		
-	private String _day;
-	private Integer _dayNum;
+	private String day;
+	private Integer dayNum;
 		
-	private Double _lastPrice;
-	private Double _previousPrice;
+	private Double lastPrice;
+	private Double previousPrice;
 		
-	private Double _priceChange;
-	private Double _priceChangePercent;
+	private Double priceChange;
+	private Double priceChangePercent;
 		
-	private Double _tradePrice;
-	private Integer _tradeSize;
+	private Double tradePrice;
+	private Integer tradeSize;
 		
-	private Double _bidPrice;
-	private Integer _bidSize;
-	private Double _askPrice;
-	private Integer _askSize;
+	private Double bidPrice;
+	private Integer bidSize;
+	private Double askPrice;
+	private Integer askSize;
 		
-	private Double _openPrice;
-	private Double _highPrice;
-	private Double _lowPrice;
-	private Double _settlementPrice;
+	private Double openPrice;
+	private Double highPrice;
+	private Double lowPrice;
+	private Double settlementPrice;
 		
-	private Integer _volume;
-	private Integer _openInterest;
+	private Integer volume;
+	private Integer openInterest;
 		
-	private String _time;
-	private String _timeDisplay;
+	private String time;
+	private String timeDisplay;
 	
 	public BasicMutableQuote(final String symbol) {
 		this(symbol, null);
 	}
 	
 	public BasicMutableQuote(final String symbol, final Synchronizer<MutableQuote> synchronizer) {
-		_symbol = symbol;
+		this.symbol = symbol;
 		
-		_sequence = null;
-		_online = false;
+		this.sequence = null;
+		this.online = false;
 			
-		_flag = null;
-		_mode = null;
-		_session = null;
+		this.flag = null;
+		this.mode = null;
+		this.session = null;
 			
-		_day = null;
-		_dayNum = null;
+		this.day = null;
+		this.dayNum = null;
 			
-		_lastPrice = null;
-		_previousPrice = null;
+		this.lastPrice = null;
+		this.previousPrice = null;
 			
-		_priceChange = null;
-		_priceChangePercent = null;
+		this.priceChange = null;
+		this.priceChangePercent = null;
 			
-		_tradePrice = null;
-		_tradeSize = null;
+		this.tradePrice = null;
+		this.tradeSize = null;
 			
-		_bidPrice = null;
-		_bidSize = null;
-		_askPrice = null;
-		_askSize = null;
+		this.bidPrice = null;
+		this.bidSize = null;
+		this.askPrice = null;
+		this.askSize = null;
 			
-		_openPrice = null;
-		_highPrice = null;
-		_lowPrice = null;
-		_settlementPrice = null;
+		this.openPrice = null;
+		this.highPrice = null;
+		this.lowPrice = null;
+		this.settlementPrice = null;
 			
-		_volume = null;
-		_openInterest = null;
+		this.volume = null;
+		this.openInterest = null;
 			
-		_time = null;
-		_timeDisplay = null;
+		this.time = null;
+		this.timeDisplay = null;
 		
 		if (synchronizer != null) {
 			synchronizer.synchronize(this);
@@ -89,262 +89,262 @@ public class BasicMutableQuote implements MutableQuote {
 
 	@Override
 	public String getSymbol() {
-		return _symbol;
+		return symbol;
 	}
 
 	@Override
 	public Integer getSequence() {
-		return _sequence;
+		return sequence;
 	}
 	
 	@Override
 	public void setSequence(Integer value) {
-		_sequence = value;
+		sequence = value;
 	}
 	
 	@Override
 	public boolean getOnline() {
-		return _online;
+		return online;
 	}
 	
 	@Override
 	public void setOnline(boolean value) {
-		_online = value;
+		online = value;
 	}
 
 	@Override
 	public String getFlag() {
-		return _flag;
+		return flag;
 	}
 	
 	@Override
 	public void setFlag(String value) {
-		_flag = value;
+		flag = value;
 	}
 
 	@Override
 	public String getMode() {
-		return _mode;
+		return mode;
 	}
 	
 	@Override
 	public void setMode(String value) {
-		_mode = value;
+		mode = value;
 	}
 
 	@Override
 	public String getSession() {
-		return _session;
+		return session;
 	}
 	
 	@Override
 	public void setSession(String value) {
-		_session = value;
+		session = value;
 	}
 
 	@Override
 	public String getDay() {
-		return _day;
+		return day;
 	}
 	
 	@Override
 	public void setDay(String value) {
-		_day = value;
+		day = value;
 	}
 
 	@Override
 	public Integer getDayNum() {
-		return _dayNum;
+		return dayNum;
 	}
 	
 	@Override
 	public void setDayNum(Integer value) {
-		_dayNum = value;
+		dayNum = value;
 	}
 
 	@Override
 	public Double getLastPrice() {
-		return _lastPrice;
+		return lastPrice;
 	}
 	
 	@Override
 	public void setLastPrice(Double value) {
-		_lastPrice = value;
+		lastPrice = value;
 	}
 
 	@Override
 	public Double getPreviousPrice() {
-		return _previousPrice;
+		return previousPrice;
 	}
 	
 	@Override
 	public void setPreviousPrice(Double value) {
-		_previousPrice = value;
+		previousPrice = value;
 	}
 
 	@Override
 	public Double getPriceChange() {
-		return _priceChange;
+		return priceChange;
 	}
 	
 	@Override
 	public void setPriceChange(Double value) {
-		_priceChange = value;
+		priceChange = value;
 	}
 
 	@Override
 	public Double getPriceChangePercent() {
-		return _priceChangePercent;
+		return priceChangePercent;
 	}
 	
 	@Override
 	public void setPriceChangePercent(Double value) {
-		_priceChangePercent = value;
+		priceChangePercent = value;
 	}
 
 	@Override
 	public Double getTradePrice() {
-		return _tradePrice;
+		return tradePrice;
 	}
 	
 	@Override
 	public void setTradePrice(Double value) {
-		_tradePrice = value;
+		tradePrice = value;
 	}
 
 	@Override
 	public Integer getTradeSize() {
-		return _tradeSize;
+		return tradeSize;
 	}
 	
 	@Override
 	public void setTradeSize(Integer value) {
-		_tradeSize = value;
+		tradeSize = value;
 	}
 
 	@Override
 	public Double getBidPrice() {
-		return _bidPrice;
+		return bidPrice;
 	}
 	
 	@Override
 	public void setBidPrice(Double value) {
-		_bidPrice = value;
+		bidPrice = value;
 	}
 
 	@Override
 	public Integer getBidSize() {
-		return _bidSize;
+		return bidSize;
 	}
 	
 	@Override
 	public void setBidSize(Integer value) {
-		_bidSize = value;
+		bidSize = value;
 	}
 
 	@Override
 	public Double getAskPrice() {
-		return _askPrice;
+		return askPrice;
 	}
 	
 	@Override
 	public void setAskPrice(Double value) {
-		_askPrice = value;
+		askPrice = value;
 	}
 
 	@Override
 	public Integer getAskSize() {
-		return _askSize;
+		return askSize;
 	}
 	
 	@Override
 	public void setAskSize(Integer value) {
-		_askSize = value;
+		askSize = value;
 	}
 
 	@Override
 	public Double getOpenPrice() {
-		return _openPrice;
+		return openPrice;
 	}
 	
 	@Override
 	public void setOpenPrice(Double value) {
-		_openPrice = value;
+		openPrice = value;
 	}
 
 	@Override
 	public Double getHighPrice() {
-		return _highPrice;
+		return highPrice;
 	}
 	
 	@Override
 	public void setHighPrice(Double value) {
-		_highPrice = value;
+		highPrice = value;
 	}
 
 	@Override
 	public Double getLowPrice() {
-		return _lowPrice;
+		return lowPrice;
 	}
 	
 	@Override
 	public void setLowPrice(Double value) {
-		_lowPrice = value;
+		lowPrice = value;
 	}
 
 	@Override
 	public Double getSettlementPrice() {
-		return _settlementPrice;
+		return settlementPrice;
 	}
 
 	@Override
 	public void setSettlementPrice(Double value) {
-		_settlementPrice = value;
+		settlementPrice = value;
 	}
 	
 	@Override
 	public Integer getVolume() {
-		return _volume;
+		return volume;
 	}
 	
 	@Override
 	public void setVolume(Integer value) {
-		_volume = value;
+		volume = value;
 	}
 
 	@Override
 	public Integer getOpenInterest() {
-		return _openInterest;
+		return openInterest;
 	}
 	
 	@Override
 	public void setOpenInterest(Integer value) {
-		_openInterest = value;
+		openInterest = value;
 	}
 
 	@Override
 	public String getTime() {
-		return _time;
+		return time;
 	}
 	
 	@Override
 	public void setTime(String value) {
-		_time = value;
+		time = value;
 	}
 
 	@Override
 	public String getTimeDisplay() {
-		return _timeDisplay;
+		return timeDisplay;
 	}
 	
 	@Override
 	public void setTimeDisplay(String value) {
-		_timeDisplay = value;
+		timeDisplay = value;
 	}
 
 
 	@Override
 	public String toString() {
-		return String.format("[BasicMutableQuote (symbol: %s, sequence: %s)]", _symbol, _sequence == null ? "--" : _sequence.intValue());
+		return String.format("[BasicMutableQuote (symbol: %s, sequence: %s)]", symbol, sequence == null ? "--" : sequence.intValue());
 	}
 }

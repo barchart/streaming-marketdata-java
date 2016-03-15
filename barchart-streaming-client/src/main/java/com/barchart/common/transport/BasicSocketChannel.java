@@ -5,19 +5,19 @@ import com.barchart.common.transport.SocketChannel;
 enum BasicSocketChannel implements SocketChannel {
 	Response("response");
 	
-	private final String _channelName;
+	private final String channelName;
 	
 	BasicSocketChannel(final String channelName) {
-		_channelName = channelName;
+		this.channelName = channelName;
 	}
 	
 	@Override
 	public String getChannelName() {
-		return _channelName;
+		return channelName;
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("[BasicSocketChannel (channelName: %s)]", _channelName);
+		return String.format("[BasicSocketChannel (channelName: %s)]", channelName);
 	}
 }

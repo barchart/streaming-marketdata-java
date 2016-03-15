@@ -7,16 +7,16 @@ import com.barchart.common.Action;
 import com.barchart.common.Disposable;
 
 public class Event<T> {
-	private final String _name;
+	private final String name;
 	
-	private Set<Action<T>> _observers;
-	private final Object _observersLock;
+	private Set<Action<T>> observers;
+	private final Object observersLock;
 
 	public Event(final String name) {
-		_name = name;
+		this.name = name;
 		
-		_observers = new LinkedHashSet<Action<T>>();
-		_observersLock = new Object();
+		this.observers = new LinkedHashSet<Action<T>>();
+		this.observersLock = new Object();
 	}
 	
 	public Disposable register(final Action<T> observer) {
@@ -26,16 +26,16 @@ public class Event<T> {
 		
 		final Disposable returnRef;
 		
-		synchronized (_observersLock) {
+		synchronized (observersLock) {
 			final Set<Action<T>> copy = new LinkedHashSet<Action<T>>();
 			
-			for (final Action<T> existing : _observers) {
+			for (final Action<T> existing : observers) {
 				copy.add(existing);
 			}
 			
 			copy.add(observer);
 			
-			_observers = copy;
+			observers = copy;
 			
 			returnRef = new Disposable() {
 				@Override
@@ -53,35 +53,35 @@ public class Event<T> {
 			throw new IllegalArgumentException("The \"observer\" argument cannot be null.");
 		}
 		
-		synchronized (_observersLock) {
-			if (_observers.contains(observer)) {
+		synchronized (observersLock) {
+			if (observers.contains(observer)) {
 				final Set<Action<T>> copy = new LinkedHashSet<Action<T>>();
 				
-				for (final Action<T> existing : _observers) {
+				for (final Action<T> existing : observers) {
 					if (existing != observer) {
 						copy.add(existing);
 					}
 				}
 				
-				_observers = copy;	
+				observers = copy;	
 			}
 		}
 	}
 	
 	public void fire(T data) {
-		final Iterable<Action<T>> observers = _observers;
+		final Iterable<Action<T>> observerReference = observers;
 		
-		for (final Action<T> observer : observers) {
+		for (final Action<T> observer : observerReference) {
 			observer.execute(data);
 		}
 	}
 	
 	public boolean getIsEmpty() {
-		return _observers.isEmpty();
+		return observers.isEmpty();
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("[Event (name: %)]", _name);
+		return String.format("[Event (name: %)]", name);
 	}
 }

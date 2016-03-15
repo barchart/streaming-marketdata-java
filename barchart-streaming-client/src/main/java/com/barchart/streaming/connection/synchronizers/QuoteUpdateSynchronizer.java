@@ -7,8 +7,8 @@ import com.barchart.common.data.Synchronizer;
 import com.barchart.streaming.data.MutableQuote;
 
 public class QuoteUpdateSynchronizer implements Synchronizer<MutableQuote> {
-	public final String _symbol;
-	public final JSONObject _data;
+	public final String symbol;
+	public final JSONObject data;
 	
 	public QuoteUpdateSynchronizer(final String symbol, final JSONObject data) {
 		if (symbol == null) {
@@ -19,8 +19,8 @@ public class QuoteUpdateSynchronizer implements Synchronizer<MutableQuote> {
 			throw new IllegalArgumentException("The \"data\" argument is required.");
 		}
 		
-		_symbol = symbol;
-		_data = data;
+		this.symbol = symbol;
+		this.data = data;
 	}
 
 	@Override
@@ -29,11 +29,11 @@ public class QuoteUpdateSynchronizer implements Synchronizer<MutableQuote> {
 			throw new IllegalArgumentException("The \"target\" argument is required.");
 		}
 		
-		if (!_symbol.equals(target.getSymbol())) {
+		if (!symbol.equals(target.getSymbol())) {
 			throw new IllegalArgumentException(String.format("The synchronizer does not apply to the \"target\" (target symbol: %s).", target.getSymbol()));
 		}
 		
-		final JSONArray names = _data.names();
+		final JSONArray names = data.names();
 			
 		for (int i = 0; i < names.length(); i++) {
 			final String name = names.optString(i);
@@ -43,7 +43,7 @@ public class QuoteUpdateSynchronizer implements Synchronizer<MutableQuote> {
 			}
 		}
 		
-		if (_data.has("lastPrice") || _data.has("previousPrice")) {
+		if (data.has("lastPrice") || data.has("previousPrice")) {
 			final Double lastPrice = target.getLastPrice();
 			final Double previousPrice = target.getPreviousPrice();
 			
@@ -71,95 +71,95 @@ public class QuoteUpdateSynchronizer implements Synchronizer<MutableQuote> {
 	private void synchronizeProperty(final MutableQuote target, final String name) {
 		switch (name) {
 			case "sequence": {
-				target.setSequence(Integer.valueOf(_data.optInt(name)));
+				target.setSequence(Integer.valueOf(data.optInt(name)));
 				break;
 			}
 			case "flag": {
-				target.setFlag(_data.optString(name));
+				target.setFlag(data.optString(name));
 				break;
 			}
 			case "online": {
-				target.setOnline(_data.optBoolean(name));
+				target.setOnline(data.optBoolean(name));
 				break;
 			}
 			case "mode": {
-				target.setMode(_data.optString(name));
+				target.setMode(data.optString(name));
 				break;
 			}
 			case "session": {
-				target.setSession(_data.optString(name));
+				target.setSession(data.optString(name));
 				break;
 			}
 			case "day": {
-				target.setDay(_data.optString(name));
+				target.setDay(data.optString(name));
 				break;
 			}
 			case "dayNum": {
-				target.setDayNum(Integer.valueOf(_data.optInt(name)));
+				target.setDayNum(Integer.valueOf(data.optInt(name)));
 				break;
 			}
 			case "lastPrice": {
-				target.setLastPrice(Double.valueOf(_data.optDouble(name)));
+				target.setLastPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "previousPrice": {
-				target.setPreviousPrice(Double.valueOf(_data.optDouble(name)));
+				target.setPreviousPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "tradePrice": {
-				target.setTradePrice(Double.valueOf(_data.optDouble(name)));
+				target.setTradePrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "tradeSize": {
-				target.setTradeSize(Integer.valueOf(_data.optInt(name)));
+				target.setTradeSize(Integer.valueOf(data.optInt(name)));
 				break;
 			}
 			case "bidPrice": {
-				target.setBidPrice(Double.valueOf(_data.optDouble(name)));
+				target.setBidPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "bidSize": {
-				target.setBidSize(Integer.valueOf(_data.optInt(name)));
+				target.setBidSize(Integer.valueOf(data.optInt(name)));
 				break;
 			}
 			case "askPrice": {
-				target.setAskPrice(Double.valueOf(_data.optDouble(name)));
+				target.setAskPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "askSize": {
-				target.setAskSize(Integer.valueOf(_data.optInt(name)));
+				target.setAskSize(Integer.valueOf(data.optInt(name)));
 				break;
 			}
 			case "openPrice": {
-				target.setOpenPrice(Double.valueOf(_data.optDouble(name)));
+				target.setOpenPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "highPrice": {
-				target.setHighPrice(Double.valueOf(_data.optDouble(name)));
+				target.setHighPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "lowPrice": {
-				target.setLowPrice(Double.valueOf(_data.optDouble(name)));
+				target.setLowPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "settlementPrice": {
-				target.setSettlementPrice(Double.valueOf(_data.optDouble(name)));
+				target.setSettlementPrice(Double.valueOf(data.optDouble(name)));
 				break;
 			}
 			case "volume": {
-				target.setVolume(Integer.valueOf(_data.optInt(name)));
+				target.setVolume(Integer.valueOf(data.optInt(name)));
 				break;
 			}
 			case "openInterest": {
-				target.setOpenInterest(Integer.valueOf(_data.optInt(name)));
+				target.setOpenInterest(Integer.valueOf(data.optInt(name)));
 				break;
 			}
 			case "time": {
-				target.setTime(String.valueOf(_data.optString(name)));
+				target.setTime(String.valueOf(data.optString(name)));
 				break;
 			}
 			case "timeDisplay": {
-				target.setTimeDisplay(String.valueOf(_data.optString(name)));
+				target.setTimeDisplay(String.valueOf(data.optString(name)));
 				break;
 			}			
 			default: {
@@ -170,6 +170,6 @@ public class QuoteUpdateSynchronizer implements Synchronizer<MutableQuote> {
 	
 	@Override
 	public String toString() {
-		return String.format("[QuoteUpdateSynchronizer (symbol: %s)]", _symbol);
+		return String.format("[QuoteUpdateSynchronizer (symbol: %s)]", symbol);
 	}
 }

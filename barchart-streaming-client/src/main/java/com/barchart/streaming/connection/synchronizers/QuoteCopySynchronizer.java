@@ -5,84 +5,84 @@ import com.barchart.streaming.data.MutableQuote;
 import com.barchart.streaming.data.Quote;
 
 public class QuoteCopySynchronizer implements Synchronizer<MutableQuote> {
-	private final String _symbol;
+	private final String symbol;
 	
-	private final Integer _sequence;
-	private final boolean _online;
+	private final Integer sequence;
+	private final boolean online;
 		
-	private final String _flag;
-	private final String _mode;
-	private final String _session;
+	private final String flag;
+	private final String mode;
+	private final String session;
 		
-	private final String _day;
-	private final Integer _dayNum;
+	private final String day;
+	private final Integer dayNum;
 		
-	private final Double _lastPrice;
-	private final Double _previousPrice;
+	private final Double lastPrice;
+	private final Double previousPrice;
 		
-	private final Double _priceChange;
-	private final Double _priceChangePercent;
+	private final Double priceChange;
+	private final Double priceChangePercent;
 		
-	private final Double _tradePrice;
-	private final Integer _tradeSize;
+	private final Double tradePrice;
+	private final Integer tradeSize;
 		
-	private final Double _bidPrice;
-	private final Integer _bidSize;
-	private final Double _askPrice;
-	private final Integer _askSize;
+	private final Double bidPrice;
+	private final Integer bidSize;
+	private final Double askPrice;
+	private final Integer askSize;
 		
-	private final Double _openPrice;
-	private final Double _highPrice;
-	private final Double _lowPrice;
-	private final Double _settlementPrice;
+	private final Double openPrice;
+	private final Double highPrice;
+	private final Double lowPrice;
+	private final Double settlementPrice;
 		
-	private final Integer _volume;
-	private final Integer _openInterest;
+	private final Integer volume;
+	private final Integer openInterest;
 		
-	private final String _time;
-	private final String _timeDisplay;
+	private final String time;
+	private final String timeDisplay;
 	
 	public QuoteCopySynchronizer(Quote quote) {
 		if (quote == null) {
 			throw new IllegalArgumentException("The \"quote\" argument is required.");
 		}
 		
-		_symbol = quote.getSymbol();
+		this.symbol = quote.getSymbol();
 		
-		_sequence = quote.getSequence();
-		_online = quote.getOnline();
+		this.sequence = quote.getSequence();
+		this.online = quote.getOnline();
 			
-		_flag = quote.getFlag();
-		_mode = quote.getMode();
-		_session = quote.getSession();
+		this.flag = quote.getFlag();
+		this.mode = quote.getMode();
+		this.session = quote.getSession();
 			
-		_day = quote.getDay();
-		_dayNum = quote.getDayNum();
+		this.day = quote.getDay();
+		this.dayNum = quote.getDayNum();
 			
-		_lastPrice = quote.getLastPrice();
-		_previousPrice = quote.getPreviousPrice();
+		this.lastPrice = quote.getLastPrice();
+		this.previousPrice = quote.getPreviousPrice();
 			
-		_priceChange = quote.getPriceChange();
-		_priceChangePercent = quote.getPriceChangePercent();
+		this.priceChange = quote.getPriceChange();
+		this.priceChangePercent = quote.getPriceChangePercent();
 			
-		_tradePrice = quote.getTradePrice();
-		_tradeSize = quote.getTradeSize();
+		this.tradePrice = quote.getTradePrice();
+		this.tradeSize = quote.getTradeSize();
 			
-		_bidPrice = quote.getBidPrice();
-		_bidSize = quote.getBidSize();
-		_askPrice = quote.getAskPrice();
-		_askSize = quote.getAskSize();
+		this.bidPrice = quote.getBidPrice();
+		this.bidSize = quote.getBidSize();
+		this.askPrice = quote.getAskPrice();
+		this.askSize = quote.getAskSize();
 			
-		_openPrice = quote.getOpenPrice();
-		_highPrice = quote.getHighPrice();
-		_lowPrice = quote.getLowPrice();
-		_settlementPrice = quote.getSettlementPrice();
+		this.openPrice = quote.getOpenPrice();
+		this.highPrice = quote.getHighPrice();
+		this.lowPrice = quote.getLowPrice();
+		this.settlementPrice = quote.getSettlementPrice();
 			
-		_volume = quote.getVolume();
-		_openInterest = quote.getOpenInterest();
+		this.volume = quote.getVolume();
+		this.openInterest = quote.getOpenInterest();
 			
-		_time = quote.getTime();
-		_timeDisplay = quote.getTimeDisplay();
+		this.time = quote.getTime();
+		this.timeDisplay = quote.getTimeDisplay();
 	}
 
 	@Override
@@ -91,48 +91,48 @@ public class QuoteCopySynchronizer implements Synchronizer<MutableQuote> {
 			throw new IllegalArgumentException("The \"target\" argument is required.");
 		}
 		
-		if (!_symbol.equals(target.getSymbol())) {
+		if (!symbol.equals(target.getSymbol())) {
 			throw new IllegalArgumentException(String.format("The synchronizer does not apply to the \"target\" (target symbol: %s).", target.getSymbol()));
 		}
 		
-		target.setSequence(_sequence);
-		target.setOnline(_online);
+		target.setSequence(sequence);
+		target.setOnline(online);
 		
-		target.setFlag(_flag);
-		target.setMode(_mode);
-		target.setSession(_session);
+		target.setFlag(flag);
+		target.setMode(mode);
+		target.setSession(session);
 		
-		target.setDay(_day);
-		target.setDayNum(_dayNum);
+		target.setDay(day);
+		target.setDayNum(dayNum);
 
-		target.setLastPrice(_lastPrice);
-		target.setPreviousPrice(_previousPrice);
+		target.setLastPrice(lastPrice);
+		target.setPreviousPrice(previousPrice);
 		
-		target.setPriceChange(_priceChange);
-		target.setPriceChangePercent(_priceChangePercent);
+		target.setPriceChange(priceChange);
+		target.setPriceChangePercent(priceChangePercent);
 		
-		target.setTradePrice(_tradePrice);
-		target.setTradeSize(_tradeSize);
+		target.setTradePrice(tradePrice);
+		target.setTradeSize(tradeSize);
 		
-		target.setBidPrice(_bidPrice);
-		target.setBidSize(_bidSize);
-		target.setAskPrice(_askPrice);
-		target.setAskSize(_askSize);
+		target.setBidPrice(bidPrice);
+		target.setBidSize(bidSize);
+		target.setAskPrice(askPrice);
+		target.setAskSize(askSize);
 		
-		target.setOpenPrice(_openPrice);
-		target.setHighPrice(_highPrice);
-		target.setLowPrice(_lowPrice);
-		target.setSettlementPrice(_settlementPrice);
+		target.setOpenPrice(openPrice);
+		target.setHighPrice(highPrice);
+		target.setLowPrice(lowPrice);
+		target.setSettlementPrice(settlementPrice);
 
-		target.setVolume(_volume);
-		target.setOpenInterest(_openInterest);
+		target.setVolume(volume);
+		target.setOpenInterest(openInterest);
 		
-		target.setTime(_time);
-		target.setTimeDisplay(_timeDisplay);
+		target.setTime(time);
+		target.setTimeDisplay(timeDisplay);
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("[QuoteCopySynchronizer (symbol: %s)]", _symbol);
+		return String.format("[QuoteCopySynchronizer (symbol: %s)]", symbol);
 	}
 }
