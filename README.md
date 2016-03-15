@@ -60,8 +60,8 @@ Manages the underlying connection to the JERQ market data server.
 
 Three primary operations exist:
 
-* subscribeToQuotes - Creates a subscription for a symbol. Changes are published when any property of the Quote changes.
-* subscribeToPriceChanges - Creates a subscription for a symbol. Changes are published only when a trade occurs at a different price level. This method generates updates far less frequently than the "subscribeToQuotes" method. 
+* subscribeToQuotes - Creates a subscription for a symbol. Changes are published when any property of the Quote changes. This method updates very frequently.
+* subscribeToPriceChanges - Creates a subscription for a symbol. Changes are published only when a trade occurs at a different price level. This method updates far less frequently than the "subscribeToQuotes" method. 
 * requestProfile - Asynchronous lookup symbol metadata.
 
 All operations are thread-safe.
