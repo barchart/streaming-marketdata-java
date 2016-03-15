@@ -1,4 +1,4 @@
-package com.barchart.realtime.test;
+package com.barchart.streaming.test;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,13 +14,13 @@ import com.barchart.streaming.data.MutableQuote;
 import com.barchart.streaming.data.Profile;
 import com.barchart.streaming.data.BasicMutableQuote;
 
-public class RealtimeTestClient {
+public class StreamingTestClient {
 	private static final Logger logger;
 	
 	static {
 		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
 		
-		logger = LoggerFactory.getLogger(RealtimeTestClient.class);
+		logger = LoggerFactory.getLogger(StreamingTestClient.class);
 	}
 	
 	public static void main(String[] args) {
