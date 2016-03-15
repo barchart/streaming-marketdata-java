@@ -91,7 +91,7 @@ A thread-safe mechanism for updating a data structure.
 
 The staging environment can be used for testing.
 
-	jerq-aggregator-stage.us-east-1.elasticbeanstalk.com
+	jerq-aggregator-stage.aws.barchart.com
 	
 
 ### Production
