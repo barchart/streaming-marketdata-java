@@ -62,9 +62,6 @@ public final class MarketSocketConnection extends SocketConnection {
 		registerSocketEventListener(MarketSocketChannel.Timestamp, new Emitter.Listener() {
 			public void call(Object... args) {
 				final JSONObject data = (JSONObject)args[0];
-				
-				logMessageReceipt(MarketSocketChannel.Timestamp, data);
-				
 				final String timestamp = data.optString("timestamp");
 				
 				if (timestamp != null) {
@@ -79,8 +76,6 @@ public final class MarketSocketConnection extends SocketConnection {
 			public void call(Object... args) {
 				final JSONObject data = (JSONObject)args[0];
 				final String symbol = data.optString("symbol");
-				
-				logMessageReceipt(MarketSocketChannel.ProfileSnapshot, data);
 
 				if (symbol != null) {
 					updateProfile(symbol, data);
@@ -92,8 +87,6 @@ public final class MarketSocketConnection extends SocketConnection {
 			public void call(Object... args) {
 				final JSONObject data = (JSONObject)args[0];
 				final String symbol = data.optString("symbol");
-				
-				logMessageReceipt(MarketSocketChannel.QuoteSnapshot, data);
 
 				if (symbol != null) {
 					final Synchronizer<MutableQuote> synchronizer = new QuoteUpdateSynchronizer(symbol, data);
@@ -122,8 +115,6 @@ public final class MarketSocketConnection extends SocketConnection {
 			public void call(Object... args) {
 				final JSONObject data = (JSONObject)args[0];
 				final String symbol = data.optString("symbol");
-				
-				logMessageReceipt(MarketSocketChannel.QuoteDelta, data);
 				
 				if (symbol != null) {
 					final Synchronizer<MutableQuote> synchronizer = new QuoteUpdateSynchronizer(symbol, data);
