@@ -10,8 +10,8 @@ uses [socket.io](http://socket.io) to access the feed and allows clients to:
 
 ##Setup
 
-The can be referenced and built with maven. Please refer to the
-pom.xml file in the barchart-streaming-client directory.
+The project can be built with maven. Please refer to the pom.xml file in 
+the **barchart-streaming-client** directory.
 
 	cd [project-directory]/barchart-streaming-client
 	mvn clean
@@ -20,7 +20,7 @@ pom.xml file in the barchart-streaming-client directory.
 	
 #Example
 
-A simple example project can be found in the barchart-streaming-client-test
+A simple example can be found in the **barchart-streaming-client-test**
 directory. There is no need to include this project with your application.
 
 Please refer to the main method of:
@@ -56,7 +56,8 @@ operations (e.g. subscribe quotes, subscribe prices, get profile).
 
 ### com.barchart.streaming.connection.MarketSocketConnection
 
-Manages the underlying connection to the JERQ market data server.
+Manages the underlying connection to the JERQ market data server, gracefully
+handling any network connectivity issues.
 
 Three primary operations exist:
 
