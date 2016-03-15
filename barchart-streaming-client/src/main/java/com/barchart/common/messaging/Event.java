@@ -22,9 +22,7 @@ public class Event<T> {
 			throw new IllegalArgumentException("The \"observer\" argument cannot be null.");
 		}
 		
-		for (final Action<T> existing : observers) {
-			observers.add(existing);
-		}
+		observers.add(observer);
 		
 		return new Disposable() {
 			@Override
