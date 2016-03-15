@@ -41,7 +41,7 @@ public final class MarketSocketConnection extends SocketConnection {
 	}
 	
 	public MarketSocketConnection() {
-		this("jerq-aggregator-prod.aws.barchart.com", 80, false);
+		this("jerq-aggregator-stage.aws.barchart.com", 80, false);
 	}
 	
 	public MarketSocketConnection(final String host) {
