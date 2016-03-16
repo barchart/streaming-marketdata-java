@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.barchart.streaming</groupId>
   <artifactId>barchart-streaming-client</artifactId>
-  <version>0.0.8</version>
+  <version>0.0.8-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>barchart.streaming.client</name>
   <description>Barchart Java Library for Streaming Market Data</description>
@@ -92,6 +92,20 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
