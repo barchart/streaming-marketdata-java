@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.barchart</groupId>
   <artifactId>barchart-streaming-client</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>0.1.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>barchart.streaming.client</name>
   <description>Barchart Java Library for Streaming Market Data</description>
@@ -124,7 +124,9 @@
         <extensions>true</extensions>
         <configuration>
           <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/service/local/staging/deploy/maven2/</nexusUrl>
           <skipLocalStaging>true</skipLocalStaging>
+          <stagingProfileId>a88b31318138db</stagingProfileId>
         </configuration>
       </plugin>
     </plugins>
