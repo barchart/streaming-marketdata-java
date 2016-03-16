@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.barchart.streaming</groupId>
   <artifactId>barchart-streaming-client</artifactId>
-  <version>0.0.8-SNAPSHOT</version>
+  <version>0.0.9-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>barchart.streaming.client</name>
   <description>Barchart Java Library for Streaming Market Data</description>
@@ -95,20 +95,6 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.6</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.4</version>
         <executions>
@@ -126,7 +112,7 @@
         <version>2.5</version>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <useReleaseProfile>false</useReleaseProfile>
+          <useReleaseProfile>true</useReleaseProfile>
           <releaseProfiles>release</releaseProfiles>
           <goals>deploy</goals>
         </configuration>
@@ -138,9 +124,9 @@
         <extensions>true</extensions>
         <configuration>
           <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <nexusUrl>https://oss.sonatype.org/service/local/staging/deploy/maven2/</nexusUrl>
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
-          <skipStaging>true</skipStaging>
+          <skipLocalStaging>true</skipLocalStaging>
         </configuration>
       </plugin>
     </plugins>
