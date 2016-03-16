@@ -26,6 +26,12 @@ hs_err_pid*
 bin/
 
 #
+# gradle
+#
+build/
+.gradle/
+
+#
 # maven build folder
 #
 target/
