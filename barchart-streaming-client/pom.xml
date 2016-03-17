@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.barchart</groupId>
   <artifactId>barchart-streaming-client</artifactId>
-  <version>0.1.4-SNAPSHOT</version>
+  <version>0.2.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>barchart.streaming.client</name>
   <description>Barchart Java Library for Streaming Market Data</description>
