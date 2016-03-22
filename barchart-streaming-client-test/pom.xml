@@ -5,9 +5,9 @@
   <version>0.2.2-SNAPSHOT</version>
   <dependencies>
   	<dependency>
-  		<groupId>com.barchart.streaming</groupId>
-  		<artifactId>barchart-streaming-client</artifactId>
-  		<version>0.1.2-SNAPSHOT</version>
+      <groupId>com.barchart</groupId>
+      <artifactId>barchart-streaming-client</artifactId>
+      <version>0.2.2-SNAPSHOT</version>
   	</dependency>
   	<dependency>
 		<groupId>org.slf4j</groupId>
