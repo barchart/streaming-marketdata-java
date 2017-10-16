@@ -8,7 +8,7 @@ uses [socket.io](http://socket.io) to access the feed and allows clients to:
 * Request basic **Profile** data for individual symbols
 * Subscribe to **Quote** updates for individual symbols
 
-##Setup
+## Setup
 
 The project can be built with maven. Please refer to the pom.xml file in 
 the **barchart-streaming-client** directory.
@@ -18,7 +18,7 @@ the **barchart-streaming-client** directory.
 	mvn install
 	
 	
-#Example
+# Example
 
 A simple example can be found in the **barchart-streaming-client-test**
 directory. There is no need to include this project with your application.
@@ -28,7 +28,7 @@ Please refer to the main method of:
 	com.barchart.streaming.test.StreamingTestClient
 
 
-##Usage
+## Usage
 
 The Barchart market data server uses socket.io[http://socket.io] endpoints. This
 library is a convenience-wrapper. So, instead of making the socket.io connection
